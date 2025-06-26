@@ -1,15 +1,15 @@
 services:
-  # ngrok:
-  #   image: ngrok/ngrok:latest
-  #   networks:
-  #     - fin_bot_network
-  #   volumes:
-  #     - ./ngrok.yml:/etc/ngrok.yml
-  #   command:
-  #     - "start"
-  #     - "--all"
-  #     - "--config"
-  #     - "/etc/ngrok.yml"
+  ngrok:
+    image: ngrok/ngrok:latest
+    networks:
+      - fin_bot_network
+    volumes:
+      - ./ngrok.yml:/etc/ngrok.yml
+    command:
+      - "start"
+      - "--all"
+      - "--config"
+      - "/etc/ngrok.yml"
   
   bot:
     build: .
@@ -21,6 +21,7 @@ services:
       - REDIS_HOST=redis_tg_fin_bot_db
     ports:
       - '8001:8001'
+    cpus: '0.5'
     # depends_on:
     #   - ngrok
     command: sh -c 'python main.py'
@@ -75,6 +76,7 @@ services:
       - REDIS_HOST=redis_tg_fin_bot_db
     networks:
       - fin_bot_network
+    cpus: '1'
     command: arq background.low_worker.WorkerSettings
     depends_on:
       - redis_tg_fin_bot_db
@@ -105,7 +107,7 @@ services:
     environment:
       - TZ=Europe/Moscow
     cpus: '1.0'
-    mem_limit: 2g
+    mem_limit: 1g
     volumes:
       - postgres-data_fin:/var/lib/postgresql/data
     # command: postgres -c max_connections=200 -c shared_buffers=2GB

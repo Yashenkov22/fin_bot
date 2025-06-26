@@ -288,7 +288,7 @@ async def main():
     # await init_db()
 
 
-    dp = Dispatcher()
+    dp = Dispatcher(storage=storage)
 #     dp.include_router(ozon_router)
 #     dp.include_router(wb_router)
     dp.include_router(main_router)
@@ -296,10 +296,9 @@ async def main():
 #     # DATABASE_URL = "postgresql+asyncpg://postgres:22222@psql_db2/postgres"
 
 
-#     # jobstores = {
-#     #     'default': SQLAlchemyJobStore(engine=engine)
-#     # }
-    # DATABASE_URL = "postgresql+psycopg2://postgres:22222@psql_db2/postgres"
+    # jobstores = {
+    #     'default': SQLAlchemyJobStore(engine=engine)
+    # }
 
     # scheduler = AsyncIOScheduler()
 

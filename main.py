@@ -33,14 +33,8 @@ from db.base import engine, session, Base, db_url, get_session
 from middlewares.db import DbSessionMiddleware
 
 from utils.storage import redis_client, storage
-from utils.scheduler import (create_new_punkts_from_old,
-                             recreate_my_scheduler_jobs,
-                             scheduler,
-                             test_add_photo_to_exist_products, test_jobs,
-                             test_migrate_on_new_sctucture_db,
-                             startup_update_scheduler_jobs,
-                             add_task_to_delete_old_message_for_users,
-                             send_fake_price)
+from utils.scheduler import (scheduler,
+                             add_task_to_delete_old_message_for_users)
 from utils.utm import add_utm_to_db
 
 from schemas import UTMSchema
@@ -131,7 +125,7 @@ async def on_startup():
     await bot.set_webhook(f"{PUBLIC_URL}{WEBHOOK_PATH}",
                           drop_pending_updates=True)
                         #   allowed_updates=['message', 'callback_query'])
-    # await init_db()
+    await init_db()
     redis_pool = await get_redis_background_pool()
     scheduler.start()
 
@@ -172,25 +166,25 @@ async def bot_webhook(update: dict):
     await dp.feed_update(bot=bot, update=tg_update)
 
 
-@app.post('/send_utm_data')
-async def send_utm_data(data: UTMSchema):
-    print('CATCH UTM', data.__dict__)
-    await add_utm_to_db(data)
+# @app.post('/send_utm_data')
+# async def send_utm_data(data: UTMSchema):
+#     print('CATCH UTM', data.__dict__)
+#     await add_utm_to_db(data)
 
 
-@app.get('/send_fake_notification')
-async def send_fake_notification_by_user(user_id: int,
-                        product_id: int,
-                        fake_price: int,
-                        secret: str):
+# @app.get('/send_fake_notification')
+# async def send_fake_notification_by_user(user_id: int,
+#                         product_id: int,
+#                         fake_price: int,
+#                         secret: str):
     
-    if secret == FAKE_NOTIFICATION_SECRET:
-    # print('CATCH UTM', data.__dict__)
-        async for session in get_session():
-            await send_fake_price(user_id,
-                                product_id,
-                                fake_price,
-                                session)
+#     if secret == FAKE_NOTIFICATION_SECRET:
+#     # print('CATCH UTM', data.__dict__)
+#         async for session in get_session():
+#             await send_fake_price(user_id,
+#                                 product_id,
+#                                 fake_price,
+#                                 session)
 
 
 if __name__ == '__main__':

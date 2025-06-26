@@ -7,7 +7,7 @@ from config import db_url, _db_url
 import asyncio
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import sessionmaker, declarative_base, relationship
-from sqlalchemy import Column, Integer, String, DATETIME, ForeignKey, Float, DateTime, TIMESTAMP, BLOB, JSON, BigInteger, Table
+from sqlalchemy import Column, Integer, String, DATETIME, ForeignKey, Float, DateTime, TIMESTAMP, BLOB, JSON, BigInteger, Table, Boolean
 
 
 # Base = declarative_base()
@@ -25,6 +25,8 @@ class User(Base):
     time_create = Column(TIMESTAMP(timezone=True))
     last_login_time = Column(TIMESTAMP(timezone=True), nullable=True, default=None)
     utm_source = Column(String, nullable=True, default=None)
+    is_active = Column(Boolean, default=True)
+
     utm = relationship("UTM", uselist=False, back_populates="user")  # Связь OneToOne
     orders = relationship("Order", back_populates="user")
 

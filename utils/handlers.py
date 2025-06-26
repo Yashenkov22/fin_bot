@@ -34,6 +34,7 @@ from .exc import NotEnoughGraphicData
 # from .scheduler import (push_check_ozon_price,
 #                              push_check_wb_price,
 #                              add_task_to_delete_old_message_for_users)
+from .scheduler import add_task_to_delete_old_message_for_users
 from .storage import redis_client
 from .any import send_data_to_yandex_metica, support_request_type_dict
 from .pics import DEFAULT_PRODUCT_LIST_PHOTO_ID
@@ -1133,6 +1134,7 @@ async def clear_state_and_redirect_to_start(message: types.Message | types.Callb
 
 async def add_user(message: types.Message,
                    session: AsyncSession,
+                   redis_pool: ArqRedis,
                    utm_source: str | None):
     # free_subscribtion_query = (
     #     select(
@@ -1172,8 +1174,9 @@ async def add_user(message: types.Message,
         except Exception as ex:
             print(ex)
             await _session.rollback()
-    #         else:
-    #             await add_task_to_delete_old_message_for_users(user_id=message.from_user.id)
+        else:
+            await add_task_to_delete_old_message_for_users(user_id=message.from_user.id,
+                                                           redis_pool=redis_pool)
     #             print('user added')
 
     #             if utm_source is not None and not utm_source.startswith('direct'):
@@ -1218,6 +1221,7 @@ async def add_user(message: types.Message,
 
 async def check_user(message: types.Message,
                      session: AsyncSession,
+                     redis_pool: ArqRedis,
                      utm_source: str | None):
     async with session as _session:
         query = (
@@ -1234,6 +1238,7 @@ async def check_user(message: types.Message,
     else:
         return await add_user(message,
                               session,
+                              redis_pool,
                               utm_source)
     
 

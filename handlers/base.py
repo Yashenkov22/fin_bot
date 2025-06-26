@@ -63,7 +63,7 @@ from utils.pics import start_pic, faq_pic_dict, DEFAULT_PRODUCT_LIST_PHOTO_ID
 
 from utils.storage import redis_client
 
-from utils.any import create_specific_faq_list
+from utils.any import add_message_to_delete_dict, create_specific_faq_list
 
 from db.base import (User,
                      Order)
@@ -85,8 +85,10 @@ async def start(message: types.Message | types.CallbackQuery,
                 state: FSMContext,
                 session: AsyncSession,
                 bot: Bot,
-                scheduler: AsyncIOScheduler):
+                scheduler: AsyncIOScheduler,
+                redis_pool: ArqRedis):
     # _message = message
+    await state.clear()
 
     # await try_delete_prev_list_msgs(message.chat.id,
     #                                 state)
@@ -104,6 +106,7 @@ async def start(message: types.Message | types.CallbackQuery,
     
     await check_user(message,
                      session,
+                     redis_pool,
                      utm_source)
         
     # await state.update_data(action=None)
@@ -120,15 +123,15 @@ async def start(message: types.Message | types.CallbackQuery,
                            reply_markup=_kb.as_markup(),
                            disable_notification=True)
     
-    chat = await bot.get_chat(chat_id=message.chat.id)
-    has_pinned_msg = bool(chat.pinned_message)
+    # chat = await bot.get_chat(chat_id=message.chat.id)
+    # has_pinned_msg = bool(chat.pinned_message)
 
-    print(chat.pinned_message)
+    # print(chat.pinned_message)
 
-    if not has_pinned_msg:
+    # if not has_pinned_msg:
         # print(22)
-        await bot.pin_chat_message(chat_id=start_msg.chat.id,
-                                   message_id=start_msg.message_id)
+    await bot.pin_chat_message(chat_id=start_msg.chat.id,
+                                message_id=start_msg.message_id)
 
 
     
@@ -174,10 +177,13 @@ async def callback_faq(callback: types.Message | types.CallbackQuery,
 
     _text = 'Выберите нужный раздел👇'
 
-    await bot.send_message(chat_id=callback.from_user.id,
+    faq_msg = await bot.send_message(chat_id=callback.from_user.id,
                            text=_text,
                            reply_markup=_kb.as_markup())
     
+    await add_message_to_delete_dict(faq_msg,
+                                     state)
+
     await callback.answer()
 
 
@@ -215,9 +221,15 @@ async def callback_support(callback: types.Message | types.CallbackQuery,
 
     await state.set_state(OrderState.request_type)
 
-    await bot.send_message(chat_id=callback.from_user.id,
+    support_msg = await bot.send_message(chat_id=callback.from_user.id,
                            text=_text,
                            reply_markup=_kb.as_markup())
+    
+    await state.update_data(support_msg=(support_msg.chat.id, support_msg.message_id))
+
+    await add_message_to_delete_dict(support_msg,
+                                     state)
+
     await callback.answer()
     
 
@@ -253,6 +265,7 @@ async def start_support_order(message: types.Message,
 
     data = await state.get_data()
 
+    support_msg: tuple = data.get('support_msg')
     request_type = data.get('request_type')
 
     valid_request_type = get_valid_request_type(request_type)
@@ -261,10 +274,18 @@ async def start_support_order(message: types.Message,
 
     _kb = create_order_confirm_kb()
 
-    await bot.send_message(chat_id=message.from_user.id,
-                           text=_text,
-                           reply_markup=_kb.as_markup())
-    await message.delete()
+    await bot.edit_message_text(text=_text,
+                                chat_id=support_msg[0],
+                                message_id=support_msg[-1],
+                                reply_markup=_kb.as_markup())
+    # await bot.send_message(chat_id=message.from_user.id,
+    #                        text=_text,
+    #                        reply_markup=_kb.as_markup())
+    try:
+        await message.delete()
+    except Exception as ex:
+        print(ex)
+        pass
 
 
 @main_router.callback_query(F.data == 'pass')
@@ -328,6 +349,8 @@ async def callback_send_order(callback: types.Message | types.CallbackQuery,
                               scheduler: AsyncIOScheduler):
     send_to = DEV_ID
 
+    await state.update_data(support_msg=None)
+
     data = await state.get_data()
 
     request_type = data.get('request_type')
@@ -359,7 +382,7 @@ async def callback_send_order(callback: types.Message | types.CallbackQuery,
             success = False
         else:
             _text = f'📝 Новое обращение\n\n'
-            _order_text = f'Тип обращения: {valid_request_type}\nКомментарий: {comment}\nДата создания обращения: {datetime.now().strftime("%d.%m.%y %H%:%M")}(по мск)'
+            _order_text = f'Тип обращения: {valid_request_type}\nКомментарий: {comment}\nДата создания обращения: {datetime.now().strftime("%d.%m.%y %H:%M")}(по мск)'
             _text += _order_text
 
             await bot.send_message(chat_id=send_to,
@@ -2610,15 +2633,15 @@ async def callback_send_order(callback: types.Message | types.CallbackQuery,
 #     await callback.answer()            
 
 
-# @main_router.message(F.content_type == types.ContentType.PHOTO)
-# async def photo_test(message: types.Message,
-#                     state: FSMContext,
-#                     session: AsyncSession,
-#                     bot: Bot,
-#                     scheduler: AsyncIOScheduler):
-#     print(message.photo)
-#     print('*' * 10)
-#     # print(message.__dict__)
+@main_router.message(F.content_type == types.ContentType.PHOTO)
+async def photo_test(message: types.Message,
+                    state: FSMContext,
+                    session: AsyncSession,
+                    bot: Bot,
+                    scheduler: AsyncIOScheduler):
+    print(message.photo)
+    print('*' * 10)
+    # print(message.__dict__)
 
 
 # @main_router.message(F.content_type == types.ContentType.TEXT)

@@ -3,7 +3,8 @@ from background.tasks import (new_push_check_ozon_price,
                               push_check_ozon_popular_product,
                               push_check_wb_popular_product,
                               periodic_delete_old_message,
-                              add_popular_product)
+                              send_message_one_time_msg,
+                              send_one_to_20_day_msg)
 from background.base import redis_settings, _redis_pool, get_redis_background_pool
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -35,6 +36,8 @@ class WorkerSettings:
         # push_check_ozon_popular_product,
         # push_check_wb_popular_product,
         periodic_delete_old_message,
+        send_message_one_time_msg,
+        send_one_to_20_day_msg,
         # add_popular_product,
     ]
     on_startup = startup

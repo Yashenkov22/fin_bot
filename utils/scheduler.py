@@ -1,5 +1,6 @@
 import json
 import re
+from arq import ArqRedis
 import pytz
 import aiohttp
 import asyncio
@@ -63,45 +64,54 @@ timezone = pytz.timezone('Europe/Moscow')
 scheduler_cron = IntervalTrigger(minutes=15,
                              timezone=timezone)
 
+test_scheduler_inverval = IntervalTrigger(minutes=1,
+                                         timezone=timezone)
+
+
+scheduler_20_day_interval = IntervalTrigger(days=20,
+                                            timezone=timezone)
+
 
 scheduler_interval = IntervalTrigger(hours=1,
                                      timezone=timezone)
 
 
-# async def add_task_to_delete_old_message_for_users(user_id: int = None):
-#     print('add task to delete old message...')
+async def add_task_to_delete_old_message_for_users(user_id: int = None,
+                                                   redis_pool: ArqRedis = None):
+    print('add task to delete old message...')
 
-#     async for session in get_session():
-#         try:
-#             if user_id is not None:
-#                 query = (
-#                     select(
-#                         User.tg_id,
-#                     )\
-#                     .where(
-#                         User.tg_id == user_id,
-#                     )
-#                     )
-#             else:
-#                 query = (
-#                     select(
-#                         User.tg_id,
-#                         )
-#                     )
+    async for session in get_session():
+        try:
+            if user_id is not None:
+                query = (
+                    select(
+                        User.tg_id,
+                    )\
+                    .where(
+                        User.tg_id == user_id,
+                    )
+                    )
+            else:
+                query = (
+                    select(
+                        User.tg_id,
+                        )
+                    )
 
-#             res = await session.execute(query)
+            res = await session.execute(query)
 
-#             res = res.fetchall()
-#         finally:
-#             try:
-#                 await session.close()
-#             except Exception:
-#                 pass
+            res = res.fetchall()
+        finally:
+            try:
+                await session.close()
+            except Exception:
+                pass
 
-#     for user in res:
-#         user_id = user[0]
-#         job_id = f'delete_msg_task_{user_id}'
-
+    for user in res:
+        user_id = user[0]
+        delete_msg_job_id = f'delete_msg_task_{user_id}'
+        one_time_job_id = f'one_time_job_{user_id}'
+        one_to_20_day_job_id = f'one_to_20_day_job_{user_id}'
         # if user_id != int(DEV_ID):
         # scheduler.add_job(periodic_delete_old_message,
         #                 trigger=scheduler_interval,
@@ -120,14 +130,39 @@ scheduler_interval = IntervalTrigger(hours=1,
             #                 kwargs={'_queue_name': 'arq:low',
             #                         'func_name': f'periodic_delete_old_message'})
         # job_id = f'popular_{marker}_{popular_product.id}'
-        # job = scheduler.add_job(func=background_task_wrapper,
+
+        # periodic task to delete old messages
+        delete_msg_job = scheduler.add_job(func=background_task_wrapper,
+                            trigger=scheduler_interval,
+                            id=delete_msg_job_id,
+                            coalesce=True,
+                            args=(f'periodic_delete_old_message', int(user_id)), # func_name, *args
+                            kwargs={'_queue_name': 'arq:low'},
+                            jobstore='sqlalchemy')  # _queue_name
+        
+        # one_time_defer_job = scheduler.add_job(func=background_task_wrapper,
         #                     trigger=scheduler_interval,
-        #                     id=job_id,
+        #                     id=one_time_job_id,
         #                     coalesce=True,
-        #                     args=(f'periodic_delete_old_message', int(user_id)), # func_name, *args
+        #                     args=(f'send_message_one_time_msg', int(user_id)), # func_name, *args
         #                     kwargs={'_queue_name': 'arq:low'},
         #                     jobstore='sqlalchemy')  # _queue_name
+        # _defer_by=timedelta(minutes=20)
 
+        await redis_pool.enqueue_job(
+                'send_message_one_time_msg',
+                user_id,
+                _queue_name='arq:low',
+                _defer_until=datetime.now() + timedelta(minutes=15)
+        )
+
+        periodic_task_one_to_20_day_job = scheduler.add_job(func=background_task_wrapper,
+                            trigger=scheduler_20_day_interval,
+                            id=one_to_20_day_job_id,
+                            coalesce=True,
+                            args=(f'send_one_to_20_day_msg', int(user_id)), # func_name, *args
+                            kwargs={'_queue_name': 'arq:low'},
+                            jobstore='sqlalchemy')  # _queue_name
 
 
 
@@ -2510,18 +2545,18 @@ async def test_periodic_delete_old_message(user_id: int):
 
 
 # # для планировании задачи в APScheduler и выполнения в ARQ worker`e
-# async def background_task_wrapper(func_name, *args, _queue_name):
+async def background_task_wrapper(func_name, *args, _queue_name):
 
-#     _redis_pool = get_redis_pool()
+    _redis_pool = get_redis_pool()
 
-#     _args_str = '.'.join([f'{arg}' for arg in args])
+    _args_str = '.'.join([f'{arg}' for arg in args])
 
-#     _job_id = f'{func_name}_{_args_str}'
+    _job_id = f'{func_name}_{_args_str}'
 
-#     await _redis_pool.enqueue_job(func_name,
-#                                   *args,
-#                                   _queue_name=_queue_name,
-#                                   _job_id=_job_id)
+    await _redis_pool.enqueue_job(func_name,
+                                  *args,
+                                  _queue_name=_queue_name,
+                                  _job_id=_job_id)
 
 
 
