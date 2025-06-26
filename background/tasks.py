@@ -938,9 +938,10 @@ async def send_one_to_20_day_msg(cxt,
     _text = 'Обновили подборку займов с максимальным процентом одобрения на сегодня!'
     _kb = create_webapp_btn_kb()
     try:
-        await bot.send_message(chat_id=user_id,
+        msg = await bot.send_message(chat_id=user_id,
                                text=_text,
                                reply_markup=_kb.as_markup())
+        await add_message_to_delete_dict(msg)
     except Exception as ex:
         print(ex)
 

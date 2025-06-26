@@ -1,14 +1,8 @@
 import asyncio
 
-# import redis
-
 import uvicorn
 
-# import redis.asyncio
-# import redis.asyncio.client
 from uvicorn import Config, Server
-
-# from aiogram.fsm.storage.redis import RedisStorage
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
@@ -23,7 +17,6 @@ from aiogram.fsm.storage.redis import RedisStorage
 
 from sqlalchemy.engine import create_engine
 from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy import select, and_
 
 from sqlalchemy.ext.automap import automap_base
 
@@ -55,22 +48,9 @@ from handlers.base import main_router
 from bot22 import bot
 
 
-#Initialize Redis storage
-# redis_client = redis.asyncio.client.Redis(host=REDIS_HOST,
-#                                           password=REDIS_PASSWORD)
-# storage = RedisStorage(redis=redis_client)
-
-### WEBHOOK ###
-
-#TG BOT
-# bot = Bot(TOKEN, parse_mode="HTML")
-
-
 dp = Dispatcher(storage=storage)
 dp.include_router(main_router)
 
-
-# #Add session and database connection in handlers 
 
 # #Initialize web server
 app = FastAPI()
@@ -96,22 +76,6 @@ server = Server(config)
 WEBHOOK_PATH = f'/webhook_'
 
 
-# Настройка хранилища задач
-# jobstores = {
-#     'sqlalchemy': SQLAlchemyJobStore(url=JOB_STORE_URL),
-# }
-
-# Создание и настройка планировщика
-# scheduler = AsyncIOScheduler(jobstores=jobstores)
-
-# scheduler = AsyncIOScheduler()
-
-# scheduler.add_jobstore('sqlalchemy', 'sqlalchemy', url=JOB_STORE_URL)
-
-
-# dp.update.middleware(DbSessionMiddleware(session_pool=session,
-#                                          scheduler=scheduler))
-
 async def init_db():
     async with engine.begin() as conn:
         # Создаем таблицы
@@ -125,7 +89,7 @@ async def on_startup():
     await bot.set_webhook(f"{PUBLIC_URL}{WEBHOOK_PATH}",
                           drop_pending_updates=True)
                         #   allowed_updates=['message', 'callback_query'])
-    await init_db()
+    # await init_db()
     redis_pool = await get_redis_background_pool()
     scheduler.start()
 
