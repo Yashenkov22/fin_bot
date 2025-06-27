@@ -103,7 +103,7 @@ def create_webapp_btn_kb(_kb: InlineKeyboardBuilder = None):
     return _kb
 
 
-def create_webapp_btn_kb(_kb: InlineKeyboardBuilder = None):
+def test_create_webapp_btn_kb(_kb: InlineKeyboardBuilder = None):
     if not _kb:
         _kb = InlineKeyboardBuilder()
     _kb.add(types.InlineKeyboardButton(text='Подобрать займ💸',
