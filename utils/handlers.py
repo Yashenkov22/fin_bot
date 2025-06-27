@@ -1711,7 +1711,8 @@ async def send_mass_message_test(bot: Bot,
                 # print('MB1', mb1)
             # else:
             _kb = test_create_webapp_btn_kb()
-            await bot.send_message('-1002852907835',
+            #'-1002852907835'
+            await bot.send_message(FIN_CHANNEL_ID,
                                     text=mass_message_text,
                                     reply_markup=_kb.as_markup())
             # if file_group is not None:
