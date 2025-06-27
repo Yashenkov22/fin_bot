@@ -131,7 +131,7 @@ async def bot_webhook(update: dict):
     await dp.feed_update(bot=bot, update=tg_update)
 
 
-@app.post('/send_mass_message')
+@app.get('/send_mass_message')
 async def send_mass_message(name_send: str):
     await send_mass_message_test(bot,
                                  session=session,
