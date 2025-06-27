@@ -103,6 +103,18 @@ def create_webapp_btn_kb(_kb: InlineKeyboardBuilder = None):
     return _kb
 
 
+def create_webapp_btn_kb(_kb: InlineKeyboardBuilder = None):
+    if not _kb:
+        _kb = InlineKeyboardBuilder()
+    _kb.add(types.InlineKeyboardButton(text='Подобрать займ💸',
+                                       url='https://zaymmgnovenno.credystore.com/'))
+    # _kb.row(types.InlineKeyboardButton(text='Посмотреть цену товара',
+    #                                    callback_data='check_price'))
+
+    return _kb
+
+
+
 def create_support_kb():
     _kb = InlineKeyboardBuilder()
 
