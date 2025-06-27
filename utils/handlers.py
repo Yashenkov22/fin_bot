@@ -22,7 +22,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.utils.media_group import MediaGroupBuilder
 
 from sqlalchemy import update, select, and_, or_, insert, exists, Subquery, func
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -1620,8 +1620,8 @@ async def send_mass_message_test(bot: Bot,
                 select(
                     MassSendMessage,
                 )\
-                .options(joinedload(MassSendMessage.images),
-                         joinedload(MassSendMessage.videos))\
+                .options(selectinload(MassSendMessage.images),
+                         selectinload(MassSendMessage.videos))\
                 .where(MassSendMessage.name == name_send)\
                 .order_by(MassSendMessage.id)
             )
