@@ -1600,7 +1600,9 @@ async def try_add_file_ids(bot: Bot,
 async def send_mass_message_test(bot: Bot,
                             session: AsyncSession,
                             name_send: str):
-        FIN_CHANNEL_ID = '-1001330344399'
+        # FIN_CHANNEL_ID = '-1001330344399'
+        FIN_CHANNEL_ID = '-1002646260144'
+
         async with session as _session:
             # Guest = Base.classes.general_models_guest
             # session: Session
