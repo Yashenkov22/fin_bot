@@ -25,6 +25,7 @@ from db.base import engine, session, Base, db_url, get_session
 
 from middlewares.db import DbSessionMiddleware
 
+from utils.handlers import send_mass_message_test
 from utils.storage import redis_client, storage
 from utils.scheduler import (scheduler,
                              add_task_to_delete_old_message_for_users)
@@ -130,10 +131,14 @@ async def bot_webhook(update: dict):
     await dp.feed_update(bot=bot, update=tg_update)
 
 
-# @app.post('/send_utm_data')
-# async def send_utm_data(data: UTMSchema):
-#     print('CATCH UTM', data.__dict__)
-#     await add_utm_to_db(data)
+@app.post('/send_mass_message')
+async def send_mass_message(name_send: str):
+    await send_mass_message_test(bot,
+                                 session=session,
+                                 name_send=name_send)
+    # print('CATCH UTM', data.__dict__)
+    # await add_utm_to_db(data)
+
 
 
 # @app.get('/send_fake_notification')

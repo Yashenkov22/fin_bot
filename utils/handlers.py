@@ -19,8 +19,10 @@ import plotly.graph_objects as go
 from aiogram import types, Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.utils.media_group import MediaGroupBuilder
 
 from sqlalchemy import update, select, and_, or_, insert, exists, Subquery, func
+from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -28,7 +30,11 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from bot22 import bot
 
 from db.base import (User,
-                     UTM)
+                     UTM,
+                     MassSendMessage,
+                     MassSendImage,
+                     MassSendVideo,
+                     MassSendFile)
 
 from .exc import NotEnoughGraphicData
 # from .scheduler import (push_check_ozon_price,
@@ -1520,3 +1526,212 @@ async def add_popular_product_to_db(_redis_pool: ArqRedis):
         await sleep(2)
 
     pass
+
+
+
+async def try_add_file_ids(bot: Bot,
+                           session: AsyncSession,
+                           obj):
+    CHANNEL_ID = '-1002646260144'
+    # MassSendImage = Base.classes.general_models_masssendimage
+    for image in obj.images:
+        if image.file_id is None:
+            _path = f'/home/skxnny/web/fin_admin/project/media/{image.image}'
+            # _path = f'https://api.moneyswap.online/media/{image.image}'
+
+            print(_path)
+            # image_file = types.FSInputFile(path=_path)
+            image_file = types.URLInputFile(url=_path)
+
+            # upload image to telegram server
+            loaded_image = await bot.send_photo(CHANNEL_ID, image_file)
+            print(loaded_image)
+            # delete image message from chat
+            # await bot.delete_message(loaded_image.chat.id, loaded_image.message_id)
+
+            image_file_id = loaded_image.photo[0].file_id
+            print(image.id, image_file_id)
+            await session.execute(update(MassSendImage).where(MassSendImage.id==image.id).values(file_id=image_file_id))
+
+    # MassSendVideo = Base.classes.general_models_masssendvideo
+    for video in obj.videos:
+        if video.file_id is None:
+            # _path = f'/home/skxnny/web/backup_bestexchange/django_fastapi/media/{video.video}'
+            # _path = f'https://api.moneyswap.online/media/{video.video}'
+            _path = f'/home/skxnny/web/fin_admin/project/media/{video.video}'
+            print(_path)
+            video_file = types.URLInputFile(url=_path)
+            # upload video to telegram server
+            loaded_video = await bot.send_video(CHANNEL_ID,
+                                                video_file,
+                                                width=1920,
+                                                height=1080)
+            # delete image message from chat
+            await bot.delete_message(loaded_video.chat.id, loaded_video.message_id)
+
+            video_file_id = loaded_video.video.file_id
+            await session.execute(update(MassSendVideo).where(MassSendVideo.id==video.id).values(file_id=video_file_id))
+
+    # MassSendFile = Base.classes.general_models_masssendfile
+    for file in obj.files:
+        if file.file_id is None:
+            # _path = f'https://api.moneyswap.online/media/{file.file}'
+            _path = f'/home/skxnny/web/fin_admin/project/media/{file.file}'
+
+
+            file_file = types.URLInputFile(url=_path)
+            # upload file to telegram server
+            loaded_file = await bot.send_document(CHANNEL_ID,
+                                                file_file)
+            # delete image message from chat
+            await bot.delete_message(loaded_file.chat.id, loaded_file.message_id)
+
+            file_file_id = loaded_file.document.file_id
+            print(file.id, file_file_id)
+            await session.execute(update(MassSendFile).where(MassSendFile.id==file.id).values(file_id=file_file_id))
+    try:
+        await session.commit()
+    except Exception as ex:
+        print(ex)
+        await session.rollback()
+
+
+
+async def send_mass_message_test(bot: Bot,
+                            session: AsyncSession,
+                            name_send: str):
+        FIN_CHANNEL_ID = '-1001330344399'
+        async with session as _session:
+            # Guest = Base.classes.general_models_guest
+            # session: Session
+
+            # get MassSendMessage model from DB
+            # MassSendMessage = Base.classes.general_models_masssendmessage
+            # mass_message = session.query(MassSendMessage)\
+            #                         .options(joinedload(MassSendMessage.general_models_masssendimage_collection),
+            #                                  joinedload(MassSendMessage.general_models_masssendvideo_collection))\
+            #                         .first()
+            # mass_message = _session.query(MassSendMessage)\
+            #                         .options(joinedload(MassSendMessage.general_models_masssendimage_collection),
+            #                                  joinedload(MassSendMessage.general_models_masssendvideo_collection))\
+            #                         .where(MassSendMessage.name == name_send).first()
+            
+            query = (
+                select(
+                    MassSendMessage,
+                )\
+                .options(joinedload(MassSendMessage.images),
+                         joinedload(MassSendMessage.videos))\
+                .where(MassSendMessage.name == name_send)\
+                .order_by(MassSendMessage.id)
+            )
+
+            res = await _session.execute(query)
+
+            mass_message = res.scalar_one_or_none()
+
+            # try add file_id for each related file passed object
+            await try_add_file_ids(bot, _session, mass_message)
+            # refresh all DB records
+            _session.expire_all()
+
+            mass_message_text: str = mass_message.content
+            print(mass_message_text)
+            # validate content text
+            mass_message_text: str = mass_message_text.replace('<p>','')\
+                                                        .replace('</p>', '\n')\
+                                                        .replace('<br>', '')\
+                                                        .replace('<p class="">', '')\
+                                                        .replace('&nbsp;', ' ')\
+                                                        # .replace('<span>', '')\
+                                                        # .replace('</span>', '')   
+
+            # print(mass_message_text)
+
+            images = [types.InputMediaPhoto(media=image.file_id) for image in mass_message.images]
+            videos = [types.InputMediaVideo(media=video.file_id) for video in mass_message.videos]
+            
+            #test for moneyswap team
+            # query = (
+            #     select(Guest)\
+            #     .where(Guest.tg_id.in_([60644557,
+            #                             350016695,
+            #                             471715294,
+            #                             311364517,
+            #                             283163508,
+            #                             5047108619,
+            #                             561803366,
+            #                             686339126,
+            #                             620839543,
+            #                             375236081,
+
+            #     ]))
+            # )
+            
+            #test for me only
+            # query = (
+            #     select(Guest)\
+            #     .where(Guest.tg_id == user_id)
+            # )
+
+            # mass_send for all guests
+            # query = (select(Guest))
+
+
+# [60644557,
+#                                         471715294,
+#                                         561803366,
+#                                         686339126,
+#                                         283163508,
+#                                         283163508,
+#                                         311364517]
+
+            # res = session.execute(query)
+
+            # guests = res.fetchall()
+
+            # print(guests)
+
+            image_video_group = None
+            if list(images+videos):
+                image_video_group = MediaGroupBuilder(images+videos, caption=mass_message_text)
+            
+            files = [types.InputMediaDocument(media=file.file_id) for file in mass_message.files]
+            file_group = None
+            if files:
+                file_group = MediaGroupBuilder(files)
+
+            # try:
+            # for guest in guests:
+                # try:
+                    # guest = guest[0]
+                    # _tg_id = guest.tg_id
+            if image_video_group is not None:
+                mb1 = await bot.send_media_group(FIN_CHANNEL_ID, media=image_video_group.build())
+                # print('MB1', mb1)
+            else:
+                await bot.send_message(FIN_CHANNEL_ID,
+                                       text=mass_message_text)
+            if file_group is not None:
+                mb2 = await bot.send_media_group(FIN_CHANNEL_ID, media=file_group.build())    
+                        # print('MB2', mb2)
+                    # guest = session.query(Guest).where(Guest.tg_id == '350016695').first()
+                    # if not guest.is_active:
+                    #     session.execute(update(Guest).where(Guest.tg_id == _tg_id).values(is_active=True))
+                        # session.commit()
+                # except Exception as ex:
+                #     print(ex)
+                #     if guest.is_active:
+                #         session.execute(update(Guest).where(Guest.tg_id == _tg_id).values(is_active=False))
+                    # session.commit()
+                # finally:
+                #     await sleep(0.3)
+            
+            # try:
+            #     session.commit()
+            # except Exception as ex:
+            #     session.rollback()
+            #     print('send error', ex)
+            
+            # session.close()
+
