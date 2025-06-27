@@ -48,7 +48,7 @@ from .pics import DEFAULT_PRODUCT_LIST_PHOTO_ID
 from keyboards import (add_back_btn,
                        add_pagination_btn, create_back_to_product_btn,
                        create_or_add_exit_btn,
-                       create_product_list_for_page_kb, new_add_pagination_btn, new_create_product_list_for_page_kb)
+                       create_product_list_for_page_kb, create_webapp_btn_kb, new_add_pagination_btn, new_create_product_list_for_page_kb)
 
 from config import DEV_ID, TEST_PHOTO_LIST
 
@@ -1710,8 +1710,10 @@ async def send_mass_message_test(bot: Bot,
                 mb1 = await bot.send_media_group(FIN_CHANNEL_ID, media=image_video_group.build())
                 # print('MB1', mb1)
             else:
+                _kb = create_webapp_btn_kb()
                 await bot.send_message(FIN_CHANNEL_ID,
-                                       text=mass_message_text)
+                                       text=mass_message_text,
+                                       reply_markup=_kb.as_markup())
             if file_group is not None:
                 mb2 = await bot.send_media_group(FIN_CHANNEL_ID, media=file_group.build())    
                         # print('MB2', mb2)
