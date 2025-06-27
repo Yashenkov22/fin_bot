@@ -1620,8 +1620,6 @@ async def send_mass_message_test(bot: Bot,
                 select(
                     MassSendMessage,
                 )\
-                .options(selectinload(MassSendMessage.images),
-                         selectinload(MassSendMessage.videos))\
                 .where(MassSendMessage.name == name_send)\
                 .order_by(MassSendMessage.id)
             )
@@ -1631,9 +1629,9 @@ async def send_mass_message_test(bot: Bot,
             mass_message = res.scalar_one_or_none()
 
             # try add file_id for each related file passed object
-            await try_add_file_ids(bot, _session, mass_message)
+            # await try_add_file_ids(bot, _session, mass_message)
             # refresh all DB records
-            _session.expire_all()
+            # _session.expire_all()
 
             mass_message_text: str = mass_message.content
             print(mass_message_text)
@@ -1648,8 +1646,8 @@ async def send_mass_message_test(bot: Bot,
 
             # print(mass_message_text)
 
-            images = [types.InputMediaPhoto(media=image.file_id) for image in mass_message.images]
-            videos = [types.InputMediaVideo(media=video.file_id) for video in mass_message.videos]
+            # images = [types.InputMediaPhoto(media=image.file_id) for image in mass_message.images]
+            # videos = [types.InputMediaVideo(media=video.file_id) for video in mass_message.videos]
             
             #test for moneyswap team
             # query = (
@@ -1692,33 +1690,33 @@ async def send_mass_message_test(bot: Bot,
 
             # print(guests)
 
-            image_video_group = None
-            if list(images+videos):
-                image_video_group = MediaGroupBuilder(images+videos, caption=mass_message_text)
+            # image_video_group = None
+            # if list(images+videos):
+            #     image_video_group = MediaGroupBuilder(images+videos, caption=mass_message_text)
             
-            files = [types.InputMediaDocument(media=file.file_id) for file in mass_message.files]
-            file_group = None
-            if files:
-                file_group = MediaGroupBuilder(files)
+            # files = [types.InputMediaDocument(media=file.file_id) for file in mass_message.files]
+            # file_group = None
+            # if files:
+            #     file_group = MediaGroupBuilder(files)
 
             # try:
             # for guest in guests:
                 # try:
                     # guest = guest[0]
                     # _tg_id = guest.tg_id
-            if image_video_group is not None:
-                mb1 = await bot.send_media_group(FIN_CHANNEL_ID, media=image_video_group.build())
+            # if image_video_group is not None:
+            #     mb1 = await bot.send_media_group(FIN_CHANNEL_ID, media=image_video_group.build())
                 # print('MB1', mb1)
-            else:
-                _kb = create_webapp_btn_kb()
-                await bot.send_message(FIN_CHANNEL_ID,
-                                       text=mass_message_text,
-                                       reply_markup=_kb.as_markup())
-            if file_group is not None:
-                mb2 = await bot.send_media_group(FIN_CHANNEL_ID, media=file_group.build())    
-                        # print('MB2', mb2)
-                    # guest = session.query(Guest).where(Guest.tg_id == '350016695').first()
-                    # if not guest.is_active:
+            # else:
+            _kb = create_webapp_btn_kb()
+            await bot.send_message(FIN_CHANNEL_ID,
+                                    text=mass_message_text,
+                                    reply_markup=_kb.as_markup())
+            # if file_group is not None:
+            #     mb2 = await bot.send_media_group(FIN_CHANNEL_ID, media=file_group.build())    
+            #             # print('MB2', mb2)
+            #         # guest = session.query(Guest).where(Guest.tg_id == '350016695').first()
+            #         # if not guest.is_active:
                     #     session.execute(update(Guest).where(Guest.tg_id == _tg_id).values(is_active=True))
                         # session.commit()
                 # except Exception as ex:
