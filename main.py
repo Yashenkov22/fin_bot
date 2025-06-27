@@ -134,7 +134,7 @@ async def bot_webhook(update: dict):
 @app.get('/send_mass_message')
 async def send_mass_message(name_send: str):
     await send_mass_message_test(bot,
-                                 session=session,
+                                 session=session(),
                                  name_send=name_send)
     # print('CATCH UTM', data.__dict__)
     # await add_utm_to_db(data)
