@@ -1538,7 +1538,7 @@ async def try_add_file_ids(bot: Bot,
             _path = f'http://65.108.242.208/media/{obj.file}'
             # _path = ge
 
-            is_image = _path.split('.')[-1] in IMAGE_POSTFIX_SET
+            is_image = obj.file.split('.')[-1] in IMAGE_POSTFIX_SET
 
             # print(_path)
             # image_file = types.FSInputFile(path=_path)
@@ -1640,6 +1640,10 @@ async def send_mass_message_test(bot: Bot,
             res = await _session.execute(query)
 
             mass_message = res.scalar_one_or_none()
+
+            # print(mass_message)
+            if not mass_message:
+                return 'pass'
 
             # try add file_id for each related file passed object
             await try_add_file_ids(bot, _session, mass_message)
