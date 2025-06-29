@@ -1632,6 +1632,7 @@ async def send_mass_message_test(bot: Bot,
                 select(
                     MassSendMessage,
                 )\
+                .options(selectinload(MassSendMessage.file))
                 .where(MassSendMessage.name == name_send)\
                 .order_by(MassSendMessage.id)
             )
@@ -1721,10 +1722,34 @@ async def send_mass_message_test(bot: Bot,
                 # print('MB1', mb1)
             # else:
             _kb = test_create_webapp_btn_kb()
+            
+            _file = mass_message.file
+
+            if _file:
+                postfix = _file.file.split('.')[-1]
+
+                is_image = postfix in IMAGE_POSTFIX_SET
+                file_id = _file.file_id
+
+                if is_image:
+                    await bot.send_photo(FIN_CHANNEL_ID,
+                                         photo=file_id,
+                                         caption=mass_message_text,
+                                         reply_markup=_kb.as_markup())
+
+                else:
+                    await bot.send_video(FIN_CHANNEL_ID,
+                                         video=file_id,
+                                         caption=mass_message_text,
+                                         reply_markup=_kb.as_markup(),
+                                         width=1920,
+                                         height=1080)
+
             #'-1002852907835'
-            await bot.send_message(FIN_CHANNEL_ID,
-                                    text=mass_message_text,
-                                    reply_markup=_kb.as_markup())
+            else:
+                await bot.send_message(FIN_CHANNEL_ID,
+                                        text=mass_message_text,
+                                        reply_markup=_kb.as_markup())
             # if file_group is not None:
             #     mb2 = await bot.send_media_group(FIN_CHANNEL_ID, media=file_group.build())    
             #             # print('MB2', mb2)
