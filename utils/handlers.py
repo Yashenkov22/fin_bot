@@ -1533,7 +1533,7 @@ async def try_add_file_ids(bot: Bot,
     CHANNEL_ID = '-1002646260144'
     # MassSendImage = Base.classes.general_models_masssendimage
     # for image in obj.images:
-    if obj.file_id is None:
+    if obj.file and obj.file.file_id is None:
             # _path = f'/home/skxnny/web/fin_admin/project/media/{image.image}'
             _path = f'http://65.108.242.208/media/{obj.file}'
             # _path = ge
