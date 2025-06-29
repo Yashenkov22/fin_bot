@@ -1535,33 +1535,33 @@ async def try_add_file_ids(bot: Bot,
     # for image in obj.images:
     if obj.file and obj.file.file_id is None:
             # _path = f'/home/skxnny/web/fin_admin/project/media/{image.image}'
-            _path = f'http://65.108.242.208/media/{obj.file.file}'
-            # _path = ge
+        _path = f'http://65.108.242.208/media/{obj.file.file}'
+        # _path = ge
 
-            is_image = obj.file.file.split('.')[-1] in IMAGE_POSTFIX_SET
+        is_image = obj.file.file.split('.')[-1] in IMAGE_POSTFIX_SET
 
-            # print(_path)
-            # image_file = types.FSInputFile(path=_path)
-            _file = types.URLInputFile(url=_path)
+        # print(_path)
+        # image_file = types.FSInputFile(path=_path)
+        _file = types.URLInputFile(url=_path)
 
-            # upload image to telegram server
-            if is_image:
-                loaded_file = await bot.send_photo(CHANNEL_ID, _file)
-                _file_id = loaded_file.photo[0].file_id
-                print(loaded_file)
-            else:
-                loaded_file = await bot.send_video(CHANNEL_ID,
-                                                    _file,
-                                                    width=1920,
-                                                    height=1080)
-                _file_id = loaded_file.video.file_id
+        # upload image to telegram server
+        if is_image:
+            loaded_file = await bot.send_photo(CHANNEL_ID, _file)
+            _file_id = loaded_file.photo[0].file_id
+            print(loaded_file)
+        else:
+            loaded_file = await bot.send_video(CHANNEL_ID,
+                                                _file,
+                                                width=1920,
+                                                height=1080)
+            _file_id = loaded_file.video.file_id
 
 
-            # delete image message from chat
-            # await bot.delete_message(loaded_image.chat.id, loaded_image.message_id)
+        # delete image message from chat
+        # await bot.delete_message(loaded_image.chat.id, loaded_image.message_id)
 
-            # print(image.id, image_file_id)
-            await session.execute(update(MassSendFile).where(MassSendFile.id==obj.file.id).values(file_id=_file_id))
+        # print(image.id, image_file_id)
+        await session.execute(update(MassSendFile).where(MassSendFile.id==obj.file.id).values(file_id=_file_id))
 
     # MassSendVideo = Base.classes.general_models_masssendvideo
     # for video in obj.videos:
@@ -1648,7 +1648,7 @@ async def send_mass_message_test(bot: Bot,
             # try add file_id for each related file passed object
             await try_add_file_ids(bot, _session, mass_message)
             # refresh all DB records
-            _session.expire_all()
+            await _session.expire_all()
 
             mass_message_text: str = mass_message.content
             print(mass_message_text)
