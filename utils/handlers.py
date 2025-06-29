@@ -1535,10 +1535,10 @@ async def try_add_file_ids(bot: Bot,
     # for image in obj.images:
     if obj.file and obj.file.file_id is None:
             # _path = f'/home/skxnny/web/fin_admin/project/media/{image.image}'
-            _path = f'http://65.108.242.208/media/{obj.file}'
+            _path = f'http://65.108.242.208/media/{obj.file.file}'
             # _path = ge
 
-            is_image = obj.file.split('.')[-1] in IMAGE_POSTFIX_SET
+            is_image = obj.file.file.split('.')[-1] in IMAGE_POSTFIX_SET
 
             # print(_path)
             # image_file = types.FSInputFile(path=_path)
