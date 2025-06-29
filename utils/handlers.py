@@ -1647,12 +1647,14 @@ async def send_mass_message_test(bot: Bot,
 
             # try add file_id for each related file passed object
             await try_add_file_ids(bot, _session, mass_message)
+            
+            mass_message_text: str = mass_message.content
+            
             # refresh all DB records
             _session.expire_all()
 
             await _session.commit()
 
-            mass_message_text: str = mass_message.content
             print(mass_message_text)
             # validate content text
             mass_message_text: str = mass_message_text.replace('<p>','')\
