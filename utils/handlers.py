@@ -32,8 +32,6 @@ from bot22 import bot
 from db.base import (User,
                      UTM,
                      MassSendMessage,
-                     MassSendImage,
-                     MassSendVideo,
                      MassSendFile)
 
 from .exc import NotEnoughGraphicData
@@ -50,7 +48,7 @@ from keyboards import (add_back_btn,
                        create_or_add_exit_btn,
                        create_product_list_for_page_kb, create_webapp_btn_kb, new_add_pagination_btn, new_create_product_list_for_page_kb, test_create_webapp_btn_kb)
 
-from config import DEV_ID, TEST_PHOTO_LIST
+from config import DEV_ID, TEST_PHOTO_LIST, IMAGE_POSTFIX_SET
 
 
 DEFAULT_PAGE_ELEMENT_COUNT = 5
@@ -1534,61 +1532,73 @@ async def try_add_file_ids(bot: Bot,
                            obj):
     CHANNEL_ID = '-1002646260144'
     # MassSendImage = Base.classes.general_models_masssendimage
-    for image in obj.images:
-        if image.file_id is None:
-            _path = f'/home/skxnny/web/fin_admin/project/media/{image.image}'
-            # _path = f'https://api.moneyswap.online/media/{image.image}'
+    # for image in obj.images:
+    if obj.file_id is None:
+            # _path = f'/home/skxnny/web/fin_admin/project/media/{image.image}'
+            _path = f'http://65.108.242.208/media/{obj.file}'
+            # _path = ge
 
-            print(_path)
+            is_image = _path.split('.')[-1] in IMAGE_POSTFIX_SET
+
+            # print(_path)
             # image_file = types.FSInputFile(path=_path)
-            image_file = types.URLInputFile(url=_path)
+            _file = types.URLInputFile(url=_path)
 
             # upload image to telegram server
-            loaded_image = await bot.send_photo(CHANNEL_ID, image_file)
-            print(loaded_image)
+            if is_image:
+                loaded_file = await bot.send_photo(CHANNEL_ID, _file)
+                _file_id = loaded_file.photo[0].file_id
+                print(loaded_file)
+            else:
+                loaded_file = await bot.send_video(CHANNEL_ID,
+                                                    _file,
+                                                    width=1920,
+                                                    height=1080)
+                _file_id = loaded_file.video.file_id
+
+
             # delete image message from chat
             # await bot.delete_message(loaded_image.chat.id, loaded_image.message_id)
 
-            image_file_id = loaded_image.photo[0].file_id
-            print(image.id, image_file_id)
-            await session.execute(update(MassSendImage).where(MassSendImage.id==image.id).values(file_id=image_file_id))
+            # print(image.id, image_file_id)
+            await session.execute(update(MassSendFile).where(MassSendFile.id==obj.file.id).values(file_id=_file_id))
 
     # MassSendVideo = Base.classes.general_models_masssendvideo
-    for video in obj.videos:
-        if video.file_id is None:
-            # _path = f'/home/skxnny/web/backup_bestexchange/django_fastapi/media/{video.video}'
-            # _path = f'https://api.moneyswap.online/media/{video.video}'
-            _path = f'/home/skxnny/web/fin_admin/project/media/{video.video}'
-            print(_path)
-            video_file = types.URLInputFile(url=_path)
-            # upload video to telegram server
-            loaded_video = await bot.send_video(CHANNEL_ID,
-                                                video_file,
-                                                width=1920,
-                                                height=1080)
-            # delete image message from chat
-            await bot.delete_message(loaded_video.chat.id, loaded_video.message_id)
+    # for video in obj.videos:
+    #     if video.file_id is None:
+    #         # _path = f'/home/skxnny/web/backup_bestexchange/django_fastapi/media/{video.video}'
+    #         # _path = f'https://api.moneyswap.online/media/{video.video}'
+    #         _path = f'/home/skxnny/web/fin_admin/project/media/{video.video}'
+    #         print(_path)
+    #         video_file = types.URLInputFile(url=_path)
+    #         # upload video to telegram server
+    #         loaded_video = await bot.send_video(CHANNEL_ID,
+    #                                             video_file,
+    #                                             width=1920,
+    #                                             height=1080)
+    #         # delete image message from chat
+    #         await bot.delete_message(loaded_video.chat.id, loaded_video.message_id)
 
-            video_file_id = loaded_video.video.file_id
-            await session.execute(update(MassSendVideo).where(MassSendVideo.id==video.id).values(file_id=video_file_id))
+    #         video_file_id = loaded_video.video.file_id
+    #         await session.execute(update(MassSendVideo).where(MassSendVideo.id==video.id).values(file_id=video_file_id))
 
-    # MassSendFile = Base.classes.general_models_masssendfile
-    for file in obj.files:
-        if file.file_id is None:
-            # _path = f'https://api.moneyswap.online/media/{file.file}'
-            _path = f'/home/skxnny/web/fin_admin/project/media/{file.file}'
+    # # MassSendFile = Base.classes.general_models_masssendfile
+    # for file in obj.files:
+    #     if file.file_id is None:
+    #         # _path = f'https://api.moneyswap.online/media/{file.file}'
+    #         _path = f'/home/skxnny/web/fin_admin/project/media/{file.file}'
 
 
-            file_file = types.URLInputFile(url=_path)
-            # upload file to telegram server
-            loaded_file = await bot.send_document(CHANNEL_ID,
-                                                file_file)
-            # delete image message from chat
-            await bot.delete_message(loaded_file.chat.id, loaded_file.message_id)
+    #         file_file = types.URLInputFile(url=_path)
+    #         # upload file to telegram server
+    #         loaded_file = await bot.send_document(CHANNEL_ID,
+    #                                             file_file)
+    #         # delete image message from chat
+    #         await bot.delete_message(loaded_file.chat.id, loaded_file.message_id)
 
-            file_file_id = loaded_file.document.file_id
-            print(file.id, file_file_id)
-            await session.execute(update(MassSendFile).where(MassSendFile.id==file.id).values(file_id=file_file_id))
+    #         file_file_id = loaded_file.document.file_id
+    #         print(file.id, file_file_id)
+    #         await session.execute(update(MassSendFile).where(MassSendFile.id==file.id).values(file_id=file_file_id))
     try:
         await session.commit()
     except Exception as ex:
@@ -1631,9 +1641,9 @@ async def send_mass_message_test(bot: Bot,
             mass_message = res.scalar_one_or_none()
 
             # try add file_id for each related file passed object
-            # await try_add_file_ids(bot, _session, mass_message)
+            await try_add_file_ids(bot, _session, mass_message)
             # refresh all DB records
-            # _session.expire_all()
+            _session.expire_all()
 
             mass_message_text: str = mass_message.content
             print(mass_message_text)

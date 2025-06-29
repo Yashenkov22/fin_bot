@@ -93,8 +93,6 @@ class Order(Base):
 
 #     id = Column(Integer, primary_key=True, index=True)
 #     content = Column(Text)
-
-
 class MassSendMessage(Base):
     __tablename__ = 'mass_send_message'
 
@@ -102,54 +100,98 @@ class MassSendMessage(Base):
     name = Column(String(255), nullable=False)
     content = Column(Text, nullable=False)
 
-    images = relationship('MassSendImage', back_populates='message', cascade="all, delete-orphan")
-    videos = relationship('MassSendVideo', back_populates='message', cascade="all, delete-orphan")
-    files = relationship('MassSendFile', back_populates='message', cascade="all, delete-orphan")
+    file = relationship('MassSendFile', back_populates='message', uselist=False, cascade="all, delete-orphan")
+    # video = relationship('MassSendVideo', back_populates='message', uselist=False, cascade="all, delete-orphan")
+    # file = relationship('MassSendFile', back_populates='message', uselist=False, cascade="all, delete-orphan")
 
     def __str__(self):
         return self.name
 
 
-class MassSendImage(Base):
-    __tablename__ = 'mass_send_image'
+# class MassSendImage(Base):
+#     __tablename__ = 'mass_send_image'
 
-    id = Column(Integer, primary_key=True)
-    image = Column(String(255), nullable=False)  # путь к файлу
-    message_id = Column(Integer, ForeignKey('mass_send_message.id'), nullable=False)
-    file_id = Column(String(255), nullable=True, default=None)
+#     id = Column(Integer, primary_key=True)
+#     image = Column(String(255), nullable=False)  # путь к файлу
+#     message_id = Column(Integer, ForeignKey('mass_send_message.id'), nullable=False, unique=True)
+#     file_id = Column(String(255), nullable=True, default=None)
 
-    message = relationship('MassSendMessage', back_populates='images')
+#     message = relationship('MassSendMessage', back_populates='image')
 
-    def __str__(self):
-        return f'Изображение {self.id}'
-
-
-class MassSendVideo(Base):
-    __tablename__ = 'mass_send_video'
-
-    id = Column(Integer, primary_key=True)
-    video = Column(String(255), nullable=False)  # путь к файлу
-    message_id = Column(Integer, ForeignKey('mass_send_message.id'), nullable=False)
-    file_id = Column(String(255), nullable=True, default=None)
-
-    message = relationship('MassSendMessage', back_populates='videos')
-
-    def __str__(self):
-        return f'Видео {self.id}'
+#     def __str__(self):
+#         return f'Изображение {self.id}'
 
 
 class MassSendFile(Base):
     __tablename__ = 'mass_send_file'
 
     id = Column(Integer, primary_key=True)
-    file = Column(String(255), nullable=False)  # путь к файлу
-    message_id = Column(Integer, ForeignKey('mass_send_message.id'), nullable=False)
+    file = Column(String(255), nullable=False)
+    message_id = Column(Integer, ForeignKey('mass_send_message.id'), nullable=False, unique=True)
     file_id = Column(String(255), nullable=True, default=None)
 
-    message = relationship('MassSendMessage', back_populates='files')
+
+    message = relationship('MassSendMessage', back_populates='file')
 
     def __str__(self):
-        return f'Файл {self.id}'
+        return f'Видео {self.id}'
+
+
+# class MassSendMessage(Base):
+#     __tablename__ = 'mass_send_message'
+
+#     id = Column(Integer, primary_key=True)
+#     name = Column(String(255), nullable=False)
+#     content = Column(Text, nullable=False)
+
+#     images = relationship('MassSendImage', back_populates='message', cascade="all, delete-orphan")
+#     videos = relationship('MassSendVideo', back_populates='message', cascade="all, delete-orphan")
+#     files = relationship('MassSendFile', back_populates='message', cascade="all, delete-orphan")
+
+#     def __str__(self):
+#         return self.name
+
+
+# class MassSendImage(Base):
+#     __tablename__ = 'mass_send_image'
+
+#     id = Column(Integer, primary_key=True)
+#     image = Column(String(255), nullable=False)  # путь к файлу
+#     message_id = Column(Integer, ForeignKey('mass_send_message.id'), nullable=False)
+#     file_id = Column(String(255), nullable=True, default=None)
+
+#     message = relationship('MassSendMessage', back_populates='images')
+
+#     def __str__(self):
+#         return f'Изображение {self.id}'
+
+
+# class MassSendVideo(Base):
+#     __tablename__ = 'mass_send_video'
+
+#     id = Column(Integer, primary_key=True)
+#     video = Column(String(255), nullable=False)  # путь к файлу
+#     message_id = Column(Integer, ForeignKey('mass_send_message.id'), nullable=False)
+#     file_id = Column(String(255), nullable=True, default=None)
+
+#     message = relationship('MassSendMessage', back_populates='videos')
+
+#     def __str__(self):
+#         return f'Видео {self.id}'
+
+
+# class MassSendFile(Base):
+#     __tablename__ = 'mass_send_file'
+
+#     id = Column(Integer, primary_key=True)
+#     file = Column(String(255), nullable=False)  # путь к файлу
+#     message_id = Column(Integer, ForeignKey('mass_send_message.id'), nullable=False)
+#     file_id = Column(String(255), nullable=True, default=None)
+
+#     message = relationship('MassSendMessage', back_populates='files')
+
+#     def __str__(self):
+#         return f'Файл {self.id}'
 
 
 sync_engine = create_engine(_db_url, echo=True)
