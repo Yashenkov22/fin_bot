@@ -1599,11 +1599,11 @@ async def try_add_file_ids(bot: Bot,
     #         file_file_id = loaded_file.document.file_id
     #         print(file.id, file_file_id)
     #         await session.execute(update(MassSendFile).where(MassSendFile.id==file.id).values(file_id=file_file_id))
-    try:
-        await session.commit()
-    except Exception as ex:
-        print(ex)
-        await session.rollback()
+    # try:
+    #     await session.commit()
+    # except Exception as ex:
+    #     print(ex)
+    #     await session.rollback()
 
 
 
@@ -1649,6 +1649,8 @@ async def send_mass_message_test(bot: Bot,
             await try_add_file_ids(bot, _session, mass_message)
             # refresh all DB records
             await _session.expire_all()
+
+            await _session.commit()
 
             mass_message_text: str = mass_message.content
             print(mass_message_text)
