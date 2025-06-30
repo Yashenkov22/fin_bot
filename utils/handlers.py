@@ -1609,9 +1609,10 @@ async def try_add_file_ids(bot: Bot,
 
 async def send_mass_message_test(bot: Bot,
                             session: AsyncSession,
-                            name_send: str):
+                            name_send: str,
+                            send_to: str):
         # FIN_CHANNEL_ID = '-1001330344399'
-        FIN_CHANNEL_ID = '-1002646260144'
+        # FIN_CHANNEL_ID = '-1002646260144'
 
         async with session as _session:
             # Guest = Base.classes.general_models_guest
@@ -1739,13 +1740,13 @@ async def send_mass_message_test(bot: Bot,
                 file_id = _file.file_id
 
                 if is_image:
-                    await bot.send_photo(FIN_CHANNEL_ID,
+                    await bot.send_photo(send_to,
                                          photo=file_id,
                                          caption=mass_message_text,
                                          reply_markup=_kb.as_markup())
 
                 else:
-                    await bot.send_video(FIN_CHANNEL_ID,
+                    await bot.send_video(send_to,
                                          video=file_id,
                                          caption=mass_message_text,
                                          reply_markup=_kb.as_markup(),
@@ -1754,7 +1755,7 @@ async def send_mass_message_test(bot: Bot,
 
             #'-1002852907835'
             else:
-                await bot.send_message(FIN_CHANNEL_ID,
+                await bot.send_message(send_to,
                                         text=mass_message_text,
                                         reply_markup=_kb.as_markup())
             # if file_group is not None:
