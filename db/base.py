@@ -99,6 +99,10 @@ class MassSendMessage(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False)
     content = Column(Text, nullable=False)
+    delay_time = Column(DateTime, nullable=True)
+    send_to = Column(String, default=None, nullable=True)
+    has_delayed_task = Column(Boolean, default=False, nullable=True)
+
 
     file = relationship('MassSendFile', back_populates='message', uselist=False, cascade="all, delete-orphan")
     # video = relationship('MassSendVideo', back_populates='message', uselist=False, cascade="all, delete-orphan")

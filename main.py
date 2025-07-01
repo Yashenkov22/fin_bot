@@ -25,7 +25,7 @@ from db.base import engine, session, Base, db_url, get_session
 
 from middlewares.db import DbSessionMiddleware
 
-from utils.handlers import send_mass_message_test
+from utils.handlers import run_delay_background_task, send_mass_message_test
 from utils.storage import redis_client, storage
 from utils.scheduler import (scheduler,
                              add_task_to_delete_old_message_for_users)
@@ -139,6 +139,7 @@ async def send_mass_message(name_send: str,):
                                  name_send=name_send,
                                  send_to=SEND_TO_ID)
 
+
 @app.get('/group_mass_message')
 async def group_mass_message(name_send: str):
     SEND_TO_ID = '-1002852907835'
@@ -147,6 +148,7 @@ async def group_mass_message(name_send: str):
                                  name_send=name_send,
                                  send_to=SEND_TO_ID)
 
+
 @app.get('/channel_mass_message')
 async def channel_mass_message(name_send: str):
     SEND_TO_ID = '-1002646260144'
@@ -154,6 +156,17 @@ async def channel_mass_message(name_send: str):
                                  session=session(),
                                  name_send=name_send,
                                  send_to=SEND_TO_ID)
+    
+
+@app.get('/run_background_task_with_delay')
+async def run_delay_mass_message(obj_id: int):
+    SEND_TO_ID = '686339126'
+    redis_pool = await get_redis_background_pool()
+
+    await run_delay_background_task(bot,
+                                 session=session(),
+                                 redis_pool=redis_pool,
+                                 obj_id=obj_id)
 
     # print('CATCH UTM', data.__dict__)
     # await add_utm_to_db(data)

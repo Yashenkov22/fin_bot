@@ -1781,3 +1781,172 @@ async def send_mass_message_test(bot: Bot,
             
             # session.close()
 
+
+
+async def run_delay_background_task(bot: Bot,
+                            session: AsyncSession,
+                            redis_pool: ArqRedis,
+                            obj_id: int):
+        # FIN_CHANNEL_ID = '-1001330344399'
+        # FIN_CHANNEL_ID = '-1002646260144'
+
+        async with session as _session:
+            # Guest = Base.classes.general_models_guest
+            # session: Session
+
+            # get MassSendMessage model from DB
+            # MassSendMessage = Base.classes.general_models_masssendmessage
+            # mass_message = session.query(MassSendMessage)\
+            #                         .options(joinedload(MassSendMessage.general_models_masssendimage_collection),
+            #                                  joinedload(MassSendMessage.general_models_masssendvideo_collection))\
+            #                         .first()
+            # mass_message = _session.query(MassSendMessage)\
+            #                         .options(joinedload(MassSendMessage.general_models_masssendimage_collection),
+            #                                  joinedload(MassSendMessage.general_models_masssendvideo_collection))\
+            #                         .where(MassSendMessage.name == name_send).first()
+            
+            query = (
+                select(
+                    MassSendMessage,
+                )\
+                .options(selectinload(MassSendMessage.file))
+                .where(MassSendMessage.id == obj_id)\
+                .order_by(MassSendMessage.id)
+            )
+
+            res = await _session.execute(query)
+
+            mass_message = res.scalar_one_or_none()
+
+            # print(mass_message)
+            if not mass_message:
+                return 'pass'
+
+            # try add file_id for each related file passed object
+            await try_add_file_ids(bot, _session, mass_message)
+            
+            # refresh all DB records
+            await _session.refresh(mass_message)
+
+            # delay_time = mass_message.delay_time
+
+            # await redis_pool.enqueue_job()
+
+            send_to = mass_message.send_to
+
+            delayed_time = mass_message.delay_time
+
+            if delayed_time and send_to:
+                await redis_pool.enqueue_job(
+                    'run_delay_task',
+                    obj_id,
+                    _queue_name='arq:low',
+                    _defer_until=delayed_time,
+            )
+
+            # await _session.commit()
+            mass_message_text: str = mass_message.content
+
+            print(mass_message_text)
+            # validate content text
+            mass_message_text: str = mass_message_text.replace('<p>','')\
+                                                        .replace('</p>', '\n')\
+                                                        .replace('<br>', '')\
+                                                        .replace('<p class="">', '')\
+                                                        .replace('&nbsp;', ' ')\
+                                                        # .replace('<span>', '')\
+                                                        # .replace('</span>', '')   
+
+            # print(mass_message_text)
+
+            # images = [types.InputMediaPhoto(media=image.file_id) for image in mass_message.images]
+            # videos = [types.InputMediaVideo(media=video.file_id) for video in mass_message.videos]
+            
+            #test for moneyswap team
+            # query = (
+            #     select(Guest)\
+            #     .where(Guest.tg_id.in_([60644557,
+            #                             350016695,
+            #                             471715294,
+            #                             311364517,
+            #                             283163508,
+            #                             5047108619,
+            #                             561803366,
+            #                             686339126,
+            #                             620839543,
+            #                             375236081,
+
+            #     ]))
+            # )
+            
+            #test for me only
+            # query = (
+            #     select(Guest)\
+            #     .where(Guest.tg_id == user_id)
+            # )
+
+            # mass_send for all guests
+            # query = (select(Guest))
+
+
+# [60644557,
+#                                         471715294,
+#                                         561803366,
+#                                         686339126,
+#                                         283163508,
+#                                         283163508,
+#                                         311364517]
+
+            # res = session.execute(query)
+
+            # guests = res.fetchall()
+
+            # print(guests)
+
+            # image_video_group = None
+            # if list(images+videos):
+            #     image_video_group = MediaGroupBuilder(images+videos, caption=mass_message_text)
+            
+            # files = [types.InputMediaDocument(media=file.file_id) for file in mass_message.files]
+            # file_group = None
+            # if files:
+            #     file_group = MediaGroupBuilder(files)
+
+            # try:
+            # for guest in guests:
+                # try:
+                    # guest = guest[0]
+                    # _tg_id = guest.tg_id
+            # if image_video_group is not None:
+            #     mb1 = await bot.send_media_group(FIN_CHANNEL_ID, media=image_video_group.build())
+                # print('MB1', mb1)
+            # else:
+            _kb = test_create_webapp_btn_kb()
+            
+            _file = mass_message.file
+
+            if _file:
+                postfix = _file.file.split('.')[-1]
+
+                is_image = postfix in IMAGE_POSTFIX_SET
+                file_id = _file.file_id
+
+                if is_image:
+                    await bot.send_photo(send_to,
+                                         photo=file_id,
+                                         caption=mass_message_text,
+                                         reply_markup=_kb.as_markup())
+
+                else:
+                    await bot.send_video(send_to,
+                                         video=file_id,
+                                         caption=mass_message_text,
+                                         reply_markup=_kb.as_markup(),
+                                         width=1920,
+                                         height=1080)
+
+            #'-1002852907835'
+            else:
+                await bot.send_message(send_to,
+                                        text=mass_message_text,
+                                        reply_markup=_kb.as_markup())

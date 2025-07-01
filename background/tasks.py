@@ -23,7 +23,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy import insert, select, and_, update, func, desc
 from sqlalchemy.orm import selectinload
 
-from db.base import (User,
+from db.base import (MassSendMessage, User,
                      get_session,
                      UTM)
 
@@ -33,7 +33,7 @@ from keyboards import (add_graphic_btn,
                        create_remove_kb,
                        create_remove_popular_kb,
                        new_create_remove_and_edit_sale_kb,
-                       create_webapp_btn_kb)
+                       create_webapp_btn_kb, test_create_webapp_btn_kb)
 
 from bot22 import bot
 
@@ -48,7 +48,7 @@ from utils.cities import city_index_dict
 from utils.exc import OzonAPICrashError, OzonProductExistsError, WbAPICrashError, WbProductExistsError
 from utils.scheduler import scheduler
 
-from config import DEV_ID, SUB_DEV_ID, WB_API_URL, OZON_API_URL, JOB_STORE_URL, TEST_PHOTO_ID
+from config import DEV_ID, IMAGE_POSTFIX_SET, SUB_DEV_ID, WB_API_URL, OZON_API_URL, JOB_STORE_URL, TEST_PHOTO_ID
 
 
 
@@ -1065,3 +1065,80 @@ async def add_punkt_by_user(cxt,
     #                                     message_id=settings_msg[-1])
 
     pass
+
+
+async def run_delay_task(cxt,
+                         obj_id: int):
+    async for session in get_session():
+        async with session as _session:
+            
+            query = (
+                select(
+                    MassSendMessage,
+                )\
+                .options(selectinload(MassSendMessage.file))
+                .where(MassSendMessage.id == obj_id)\
+                .order_by(MassSendMessage.id)
+            )
+
+            res = await _session.execute(query)
+
+            mass_message = res.scalar_one_or_none()
+
+            # print(mass_message)
+            if not mass_message:
+                return 'pass'
+
+        mass_message_text: str = mass_message.content
+
+        print(mass_message_text)
+        # validate content text
+        mass_message_text: str = mass_message_text.replace('<p>','')\
+                                                    .replace('</p>', '\n')\
+                                                    .replace('<br>', '')\
+                                                    .replace('<p class="">', '')\
+                                                    .replace('&nbsp;', ' ')\
+                                                    # .replace('<span>', '')\
+                                                    # .replace('</span>', '')   
+
+        send_to = mass_message.send_to
+
+        # delayed_time = mass_message.delay_time
+
+        # if delayed_time and send_to:
+        #     await redis_pool.enqueue_job(
+        #         'send_message_one_time_msg',
+        #         user_id,
+        #         _queue_name='arq:low',
+        #         _defer_until=datetime.now() + timedelta(minutes=15)
+        # )
+
+        _kb = test_create_webapp_btn_kb()
+        
+        _file = mass_message.file
+
+        if _file:
+            postfix = _file.file.split('.')[-1]
+
+            is_image = postfix in IMAGE_POSTFIX_SET
+            file_id = _file.file_id
+
+            if is_image:
+                await bot.send_photo(send_to,
+                                        photo=file_id,
+                                        caption=mass_message_text,
+                                        reply_markup=_kb.as_markup())
+
+            else:
+                await bot.send_video(send_to,
+                                        video=file_id,
+                                        caption=mass_message_text,
+                                        reply_markup=_kb.as_markup(),
+                                        width=1920,
+                                        height=1080)
+
+        #'-1002852907835'
+        else:
+            await bot.send_message(send_to,
+                                    text=mass_message_text,
+                                    reply_markup=_kb.as_markup())
