@@ -163,6 +163,10 @@ async def run_delay_mass_message(obj_id: int):
     SEND_TO_ID = '686339126'
     redis_pool = await get_redis_background_pool()
 
+    if not redis_pool:
+        print('не нашел redis!!!')
+        return
+
     print('пытаюсь кинуть задачу в очередь...')
 
     await run_delay_background_task(bot,
