@@ -1820,6 +1820,8 @@ async def run_delay_background_task(bot: Bot,
 
             # print(mass_message)
             if not mass_message:
+                print(obj_id)
+                print('msg not found in rub bg task')
                 return 'pass'
 
             # try add file_id for each related file passed object
