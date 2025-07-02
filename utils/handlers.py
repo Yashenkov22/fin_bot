@@ -1814,8 +1814,8 @@ async def run_delay_background_task(bot: Bot,
             sub_res = await _session.execute(sub_query)
 
             sub_res = sub_res.fetchall()
-
-            print('sub res', sub_res)
+            for s_r in sub_res:
+                print('sub res', s_r)
             
             query = (
                 select(
