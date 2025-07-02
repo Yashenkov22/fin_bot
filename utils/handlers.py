@@ -40,7 +40,7 @@ from .exc import NotEnoughGraphicData
 #                              add_task_to_delete_old_message_for_users)
 from .scheduler import add_task_to_delete_old_message_for_users
 from .storage import redis_client
-from .any import send_data_to_yandex_metica, support_request_type_dict
+from .any import send_data_to_yandex_metica, support_request_type_dict, has_delayed_task_dict
 from .pics import DEFAULT_PRODUCT_LIST_PHOTO_ID
 
 from keyboards import (add_back_btn,
@@ -1867,7 +1867,7 @@ async def run_delay_background_task(bot: Bot,
                         update(
                             MassSendMessage
                         )\
-                        .values(has_delayed_task=True)\
+                        .values(has_delayed_task=has_delayed_task_dict.get('start'))\
                         .where(
                             MassSendMessage.id == obj_id,
                         )

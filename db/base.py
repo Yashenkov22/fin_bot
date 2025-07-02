@@ -101,7 +101,8 @@ class MassSendMessage(Base):
     content = Column(Text, nullable=False)
     delay_time = Column(DateTime(timezone=True), nullable=True)
     send_to = Column(String, default=None, nullable=True)
-    has_delayed_task = Column(Boolean, default=False, nullable=True)
+    # has_delayed_task = Column(Boolean, default=False, nullable=True)
+    has_delayed_task = Column(String, nullable=True, default=None)
 
 
     file = relationship('MassSendFile', back_populates='message', uselist=False, cascade="all, delete-orphan")

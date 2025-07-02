@@ -43,7 +43,8 @@ from utils.any import (generate_pretty_amount,
                   add_message_to_delete_dict,
                   generate_percent_to_popular_product,
                   send_data_to_yandex_metica,
-                  valid_send_to_dict)
+                  valid_send_to_dict,
+                  has_delayed_task_dict)
 from utils.pics import DEFAULT_PRODUCT_LIST_PHOTO_ID, DEFAULT_PRODUCT_PHOTO_ID, TASK_PHOTO_15_MIN
 from utils.cities import city_index_dict
 from utils.exc import OzonAPICrashError, OzonProductExistsError, WbAPICrashError, WbProductExistsError
@@ -1155,12 +1156,25 @@ async def run_delay_task(cxt,
                                         reply_markup=_kb.as_markup())
         except Exception as ex:
             print('отложенный пост упал с ОШИБКОЙ', ex)
+            update_query = (
+                update(
+                    MassSendMessage
+                )\
+                .values(has_delayed_task=has_delayed_task_dict.get('error'))\
+                .where(
+                    MassSendMessage.id == obj_id,
+                )
+            )
+
+            await _session.execute(update_query)
+
+            await _session.commit()
         else:
             update_query = (
                 update(
                     MassSendMessage
                 )\
-                .values(has_delayed_task=False)\
+                .values(has_delayed_task=has_delayed_task_dict.get('success'))\
                 .where(
                     MassSendMessage.id == obj_id,
                 )

@@ -62,6 +62,13 @@ valid_send_to_dict = {
 }
 
 
+has_delayed_task_dict = {
+    'start': 'Запланировано',
+    'success': 'Завершилось успешно',
+    'error': 'Завершилось с ошибкой',
+}
+
+
 def create_specific_faq_list(faq_data: Literal['common',
                                              'search_credit',
                                              'get_money',
