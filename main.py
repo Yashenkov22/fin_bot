@@ -163,10 +163,14 @@ async def run_delay_mass_message(obj_id: int):
     SEND_TO_ID = '686339126'
     redis_pool = await get_redis_background_pool()
 
+    print('пытаюсь кинуть задачу в очередь...')
+
     await run_delay_background_task(bot,
                                  session=session(),
                                  redis_pool=redis_pool,
                                  obj_id=obj_id)
+
+    print('после, задача должна быть в очереди...')
 
     # print('CATCH UTM', data.__dict__)
     # await add_utm_to_db(data)
