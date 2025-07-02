@@ -1127,28 +1127,45 @@ async def run_delay_task(cxt,
         
         _file = mass_message.file
 
-        if _file:
-            postfix = _file.file.split('.')[-1]
+        try:
+            if _file:
+                postfix = _file.file.split('.')[-1]
 
-            is_image = postfix in IMAGE_POSTFIX_SET
-            file_id = _file.file_id
+                is_image = postfix in IMAGE_POSTFIX_SET
+                file_id = _file.file_id
 
-            if is_image:
-                await bot.send_photo(send_to,
-                                        photo=file_id,
-                                        caption=mass_message_text,
-                                        reply_markup=_kb.as_markup())
+                if is_image:
+                    await bot.send_photo(send_to,
+                                            photo=file_id,
+                                            caption=mass_message_text,
+                                            reply_markup=_kb.as_markup())
 
+                else:
+                    await bot.send_video(send_to,
+                                            video=file_id,
+                                            caption=mass_message_text,
+                                            reply_markup=_kb.as_markup(),
+                                            width=1920,
+                                            height=1080)
+
+            #'-1002852907835'
             else:
-                await bot.send_video(send_to,
-                                        video=file_id,
-                                        caption=mass_message_text,
-                                        reply_markup=_kb.as_markup(),
-                                        width=1920,
-                                        height=1080)
-
-        #'-1002852907835'
+                await bot.send_message(send_to,
+                                        text=mass_message_text,
+                                        reply_markup=_kb.as_markup())
+        except Exception as ex:
+            print('отложенный пост упал с ОШИБКОЙ', ex)
         else:
-            await bot.send_message(send_to,
-                                    text=mass_message_text,
-                                    reply_markup=_kb.as_markup())
+            update_query = (
+                update(
+                    MassSendMessage
+                )\
+                .values(has_delay_task=False)\
+                .where(
+                    MassSendMessage.id == obj_id,
+                )
+            )
+
+            await _session.execute(update_query)
+
+            await _session.commit()

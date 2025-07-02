@@ -1853,12 +1853,29 @@ async def run_delay_background_task(bot: Bot,
             delayed_time = mass_message.delay_time
 
             if delayed_time and send_to:
-                await redis_pool.enqueue_job(
-                    'run_delay_task',
-                    obj_id,
-                    _queue_name='arq:low',
-                    _defer_until=delayed_time,
-                )
+                try:
+                    await redis_pool.enqueue_job(
+                        'run_delay_task',
+                        obj_id,
+                        _queue_name='arq:low',
+                        _defer_until=delayed_time,
+                    )
+                except Exception as ex:
+                    pass
+                else:
+                    update_query = (
+                        update(
+                            MassSendMessage
+                        )\
+                        .values(has_delay_task=True)\
+                        .where(
+                            MassSendMessage.id == obj_id,
+                        )
+                    )
+
+                    await _session.execute(update_query)
+
+                    await _session.commit()
                 return
 
             # await _session.commit()
