@@ -1842,7 +1842,8 @@ async def run_delay_background_task(bot: Bot,
                     obj_id,
                     _queue_name='arq:low',
                     _defer_until=delayed_time,
-            )
+                )
+                return
 
             # await _session.commit()
             mass_message_text: str = mass_message.content

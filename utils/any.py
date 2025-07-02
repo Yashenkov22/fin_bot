@@ -55,6 +55,13 @@ support_request_type_dict = {
 }
 
 
+valid_send_to_dict = {
+    'Fin бот группа': '-1002852907835',
+    'Fin бот канал': '-1002646260144',
+    'Админу': '686339126',
+}
+
+
 def create_specific_faq_list(faq_data: Literal['common',
                                              'search_credit',
                                              'get_money',

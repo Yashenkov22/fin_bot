@@ -42,7 +42,8 @@ from utils.any import (generate_pretty_amount,
                   generate_sale_for_price,
                   add_message_to_delete_dict,
                   generate_percent_to_popular_product,
-                  send_data_to_yandex_metica)
+                  send_data_to_yandex_metica,
+                  valid_send_to_dict)
 from utils.pics import DEFAULT_PRODUCT_LIST_PHOTO_ID, DEFAULT_PRODUCT_PHOTO_ID, TASK_PHOTO_15_MIN
 from utils.cities import city_index_dict
 from utils.exc import OzonAPICrashError, OzonProductExistsError, WbAPICrashError, WbProductExistsError
@@ -1069,6 +1070,7 @@ async def add_punkt_by_user(cxt,
 
 async def run_delay_task(cxt,
                          obj_id: int):
+    print('background task with delay run...')
     async for session in get_session():
         async with session as _session:
             
@@ -1087,7 +1089,13 @@ async def run_delay_task(cxt,
 
             # print(mass_message)
             if not mass_message:
+                print('msg not found in db')
                 return 'pass'
+
+        print(mass_message)
+
+        print(mass_message.__dict__)
+
 
         mass_message_text: str = mass_message.content
 
@@ -1101,7 +1109,9 @@ async def run_delay_task(cxt,
                                                     # .replace('<span>', '')\
                                                     # .replace('</span>', '')   
 
-        send_to = mass_message.send_to
+        _send_to = mass_message.send_to
+
+        send_to = valid_send_to_dict.get(_send_to, DEV_ID)
 
         # delayed_time = mass_message.delay_time
 
