@@ -1867,7 +1867,7 @@ async def run_delay_background_task(bot: Bot,
                         update(
                             MassSendMessage
                         )\
-                        .values(has_delay_task=True)\
+                        .values(has_delayed_task=True)\
                         .where(
                             MassSendMessage.id == obj_id,
                         )

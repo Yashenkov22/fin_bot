@@ -1160,7 +1160,7 @@ async def run_delay_task(cxt,
                 update(
                     MassSendMessage
                 )\
-                .values(has_delay_task=False)\
+                .values(has_delayed_task=False)\
                 .where(
                     MassSendMessage.id == obj_id,
                 )
