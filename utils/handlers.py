@@ -1809,9 +1809,8 @@ async def run_delay_background_task(bot: Bot,
                 select(
                     MassSendMessage,
                 )\
-                .options(selectinload(MassSendMessage.file))
-                .where(MassSendMessage.id == obj_id)\
-                .order_by(MassSendMessage.id)
+                # .options(selectinload(MassSendMessage.file))
+                .where(MassSendMessage.id == obj_id)
             )
 
             res = await _session.execute(query)
@@ -1823,6 +1822,9 @@ async def run_delay_background_task(bot: Bot,
                 print(obj_id)
                 print('msg not found in rub bg task')
                 return 'pass'
+            else:
+                print('нашел', mass_message)
+                return
 
             # try add file_id for each related file passed object
             await try_add_file_ids(bot, _session, mass_message)
