@@ -1786,7 +1786,7 @@ async def send_mass_message_test(bot: Bot,
 async def run_delay_background_task(bot: Bot,
                             session: AsyncSession,
                             redis_pool: ArqRedis,
-                            name_send: str):
+                            obj_id: int):
         # FIN_CHANNEL_ID = '-1001330344399'
         # FIN_CHANNEL_ID = '-1002646260144'
 
@@ -1805,24 +1805,24 @@ async def run_delay_background_task(bot: Bot,
             #                                  joinedload(MassSendMessage.general_models_masssendvideo_collection))\
             #                         .where(MassSendMessage.name == name_send).first()
 
-            sub_query = (
-                select(
-                    MassSendMessage
-                )
-            )
+            # sub_query = (
+            #     select(
+            #         MassSendMessage
+            #     )
+            # )
 
-            sub_res = await _session.execute(sub_query)
+            # sub_res = await _session.execute(sub_query)
 
-            sub_res = sub_res.fetchall()
-            for s_r in sub_res:
-                print('sub res', s_r[0].__dict__)
+            # sub_res = sub_res.fetchall()
+            # for s_r in sub_res:
+            #     print('sub res', s_r[0].__dict__)
             
             query = (
                 select(
                     MassSendMessage,
                 )\
-                # .options(selectinload(MassSendMessage.file))
-                .where(MassSendMessage.name == name_send)
+                .options(selectinload(MassSendMessage.file))
+                .where(MassSendMessage.id == obj_id)
             )
 
             res = await _session.execute(query)
@@ -1831,12 +1831,12 @@ async def run_delay_background_task(bot: Bot,
 
             # print(mass_message)
             if not mass_message:
-                print(name_send)
+                print(obj_id)
                 print('msg not found in rub bg task')
                 return 'pass'
-            else:
-                print('нашел', mass_message)
-                return
+            # else:
+            #     print('нашел', mass_message)
+            #     return
 
             # try add file_id for each related file passed object
             await try_add_file_ids(bot, _session, mass_message)
