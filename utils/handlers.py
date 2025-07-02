@@ -1804,6 +1804,18 @@ async def run_delay_background_task(bot: Bot,
             #                         .options(joinedload(MassSendMessage.general_models_masssendimage_collection),
             #                                  joinedload(MassSendMessage.general_models_masssendvideo_collection))\
             #                         .where(MassSendMessage.name == name_send).first()
+
+            sub_query = (
+                select(
+                    MassSendMessage
+                )
+            )
+
+            sub_res = await _session.execute(sub_query)
+
+            sub_res = sub_res.fetchall()
+
+            print('sub res', sub_res)
             
             query = (
                 select(
