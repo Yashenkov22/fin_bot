@@ -159,7 +159,7 @@ async def channel_mass_message(name_send: str):
     
 
 @app.get('/run_background_task_with_delay')
-async def run_delay_mass_message(obj_id: int):
+async def run_delay_mass_message(name_send: str):
     SEND_TO_ID = '686339126'
     redis_pool = await get_redis_background_pool()
 
@@ -172,7 +172,7 @@ async def run_delay_mass_message(obj_id: int):
     await run_delay_background_task(bot,
                                  session=session(),
                                  redis_pool=redis_pool,
-                                 obj_id=obj_id)
+                                 name_send=name_send)
 
     print('после, задача должна быть в очереди...')
 

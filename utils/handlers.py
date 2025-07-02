@@ -1786,7 +1786,7 @@ async def send_mass_message_test(bot: Bot,
 async def run_delay_background_task(bot: Bot,
                             session: AsyncSession,
                             redis_pool: ArqRedis,
-                            obj_id: int):
+                            name_send: str):
         # FIN_CHANNEL_ID = '-1001330344399'
         # FIN_CHANNEL_ID = '-1002646260144'
 
@@ -1810,7 +1810,7 @@ async def run_delay_background_task(bot: Bot,
                     MassSendMessage,
                 )\
                 # .options(selectinload(MassSendMessage.file))
-                .where(MassSendMessage.id == obj_id)
+                .where(MassSendMessage.name == name_send)
             )
 
             res = await _session.execute(query)
@@ -1819,7 +1819,7 @@ async def run_delay_background_task(bot: Bot,
 
             # print(mass_message)
             if not mass_message:
-                print(obj_id)
+                print(name_send)
                 print('msg not found in rub bg task')
                 return 'pass'
             else:
