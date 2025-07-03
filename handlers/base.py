@@ -313,13 +313,17 @@ async def callback_send_order(callback: types.Message | types.CallbackQuery,
         'comment': comment,
     }
 
-    query = (
-        insert(Order)\
-        .values(**insert_data)
-    )
+    new_order = Order(**insert_data)
+
+    # query = (
+    #     insert(Order)\
+    #     .values(**insert_data)
+    # )
 
     async with session as _session:
-        await _session.execute(query)
+        await _session.flush()
+        new_order_id = new_order.id
+        # await _session.execute(query)
 
         try:
             success = True
@@ -331,7 +335,7 @@ async def callback_send_order(callback: types.Message | types.CallbackQuery,
         else:
             CHANNEL_ID = '-1002646260144'
             _text = f'📝 Новое обращение\n\n'
-            _order_text = f'Тип обращения: {valid_request_type}\nКомментарий: {comment}\nДата создания обращения: {datetime.now().strftime("%d.%m.%y %H:%M")}(по мск)'
+            _order_text = f'Тип обращения: {valid_request_type}\nКомментарий: {comment}\nДата создания обращения: {datetime.now().strftime("%d.%m.%y %H:%M")}(по мск)\n\nСсылка на <a href="http://65.108.242.208/admin/main/masssendmessage/{new_order_id}/change/">Django админку</a>'
             _text += _order_text
 
             await bot.send_message(chat_id=CHANNEL_ID,
