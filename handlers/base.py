@@ -329,11 +329,12 @@ async def callback_send_order(callback: types.Message | types.CallbackQuery,
             await _session.rollback()
             success = False
         else:
+            CHANNEL_ID = '-1002646260144'
             _text = f'📝 Новое обращение\n\n'
             _order_text = f'Тип обращения: {valid_request_type}\nКомментарий: {comment}\nДата создания обращения: {datetime.now().strftime("%d.%m.%y %H:%M")}(по мск)'
             _text += _order_text
 
-            await bot.send_message(chat_id=send_to,
+            await bot.send_message(chat_id=CHANNEL_ID,
                                    text=_text)
         finally:
             try:

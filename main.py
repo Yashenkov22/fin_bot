@@ -133,7 +133,7 @@ async def bot_webhook(update: dict):
 
 @app.get('/test_mass_message')
 async def send_mass_message(name_send: str,):
-    SEND_TO_ID = '686339126'
+    SEND_TO_ID = '-1002646260144'
     await send_mass_message_test(bot,
                                  session=session(),
                                  name_send=name_send,
