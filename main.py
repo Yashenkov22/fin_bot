@@ -142,7 +142,7 @@ async def send_mass_message(name_send: str,):
 
 @app.get('/group_mass_message')
 async def group_mass_message(name_send: str):
-    SEND_TO_ID = '-1002852907835'
+    SEND_TO_ID = '-1002596682443'
     await send_mass_message_test(bot,
                                  session=session(),
                                  name_send=name_send,
@@ -151,7 +151,7 @@ async def group_mass_message(name_send: str):
 
 @app.get('/channel_mass_message')
 async def channel_mass_message(name_send: str):
-    SEND_TO_ID = '-1002646260144'
+    SEND_TO_ID = '-1001330344399'
     await send_mass_message_test(bot,
                                  session=session(),
                                  name_send=name_send,
@@ -160,7 +160,7 @@ async def channel_mass_message(name_send: str):
 
 @app.get('/run_background_task_with_delay')
 async def run_delay_mass_message(obj_id: int):
-    SEND_TO_ID = '686339126'
+    # SEND_TO_ID = '686339126'
     redis_pool = await get_redis_background_pool()
 
     if not redis_pool:
