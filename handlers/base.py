@@ -321,6 +321,8 @@ async def callback_send_order(callback: types.Message | types.CallbackQuery,
     # )
 
     async with session as _session:
+        _session.add(new_order)
+        await session.flush()
         await _session.flush()
         new_order_id = new_order.id
         # await _session.execute(query)
