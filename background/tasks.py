@@ -1107,8 +1107,8 @@ async def run_delay_task(cxt,
                                                     .replace('<br>', '')\
                                                     .replace('<p class="">', '')\
                                                     .replace('&nbsp;', ' ')\
-                                                    # .replace('<span>', '')\
-                                                    # .replace('</span>', '')   
+                                                    .replace('<span>', '')\
+                                                    .replace('</span>', '')   
 
         _send_to = mass_message.send_to
 
