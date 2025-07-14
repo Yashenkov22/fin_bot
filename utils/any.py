@@ -286,3 +286,28 @@ def generate_percent_to_popular_product(start_price: float,
 
 
 #     pass
+
+
+from bs4 import BeautifulSoup
+
+def sanitize_html_for_telegram(html: str) -> str:
+    allowed_tags = ['b', 'strong', 'i', 'em', 'u', 's', 'strike', 'del', 'a', 'code', 'pre', 'blockquote', 'br', 'p']
+    allowed_attrs = {
+        'a': ['href'],
+    }
+
+    soup = BeautifulSoup(html, 'html.parser')
+
+    for tag in soup.find_all():
+        if tag.name not in allowed_tags:
+            tag.unwrap()  # удаляет тег, но сохраняет содержимое
+            continue
+
+        # Удаляем все атрибуты, кроме разрешенных
+        tag.attrs = {k: v for k, v in tag.attrs.items() if k in allowed_attrs.get(tag.name, [])}
+
+        # <span> разрешён только с class="tg-spoiler"
+        if tag.name == 'span' and tag.get('class') != ['tg-spoiler']:
+            tag.unwrap()
+
+    return str(soup)

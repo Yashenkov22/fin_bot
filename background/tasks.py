@@ -41,7 +41,7 @@ from utils.storage import redis_client
 from utils.any import (generate_pretty_amount,
                   generate_sale_for_price,
                   add_message_to_delete_dict,
-                  generate_percent_to_popular_product,
+                  generate_percent_to_popular_product, sanitize_html_for_telegram,
                   send_data_to_yandex_metica,
                   valid_send_to_dict,
                   has_delayed_task_dict)
@@ -1108,7 +1108,9 @@ async def run_delay_task(cxt,
                                                     .replace('<p class="">', '')\
                                                     .replace('&nbsp;', ' ')\
                                                     .replace('<span>', '')\
-                                                    .replace('</span>', '')   
+                                                    .replace('</span>', '')
+        
+        mass_message_text = sanitize_html_for_telegram(mass_message_text)
 
         _send_to = mass_message.send_to
 
