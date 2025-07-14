@@ -1888,8 +1888,8 @@ async def run_delay_background_task(bot: Bot,
                                                         .replace('<br>', '')\
                                                         .replace('<p class="">', '')\
                                                         .replace('&nbsp;', ' ')\
-                                                        # .replace('<span>', '')\
-                                                        # .replace('</span>', '')   
+                                                        .replace('<span>', '')\
+                                                        .replace('</span>', '')   
 
             # print(mass_message_text)
 
