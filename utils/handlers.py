@@ -954,7 +954,7 @@ def get_valid_request_type(request_type: Literal['partnership', 'error']):
 async def clear_state_and_redirect_to_start(message: types.Message | types.CallbackQuery,
                                             state: FSMContext,
                                             bot: Bot):
-    await state.clear()
+    # await state.clear()
 
     _kb = add_back_btn(InlineKeyboardBuilder())
 

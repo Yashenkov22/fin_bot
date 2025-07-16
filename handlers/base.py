@@ -75,7 +75,7 @@ async def start(message: types.Message | types.CallbackQuery,
                 bot: Bot,
                 scheduler: AsyncIOScheduler,
                 redis_pool: ArqRedis):
-    await state.clear()
+    await state.set_state()
 
     utm_source = None
 
@@ -252,7 +252,8 @@ async def callback_pass(callback: types.Message | types.CallbackQuery,
                        session: AsyncSession,
                        bot: Bot,
                        scheduler: AsyncIOScheduler):
-    await state.clear()
+    # await state.clear()
+    await state.set_state()
     try:
         await callback.message.delete()
         await callback.answer()
