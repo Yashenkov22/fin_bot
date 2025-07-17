@@ -1856,9 +1856,15 @@ async def run_delay_background_task(bot: Bot,
 
             if delayed_time and send_to:
                 try:
+                    _job_id = f'defered task_send_post_{obj_id}'
+
+                    key = f"arq:job:{_job_id}"
+                    await redis_pool.delete(key)
+
                     await redis_pool.enqueue_job(
                         'run_delay_task',
                         obj_id,
+                        _job_id=_job_id,
                         _queue_name='arq:low',
                         _defer_until=delayed_time,
                     )
