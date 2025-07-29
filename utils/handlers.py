@@ -1873,7 +1873,7 @@ async def run_delay_background_task(bot: Bot,
                     await redis_pool.delete(key)
 
                     await redis_pool.enqueue_job(
-                        'run_delaчy_task',
+                        'run_delay_task',
                         obj_id,
                         _job_id=_job_id,
                         _queue_name='arq:low',
