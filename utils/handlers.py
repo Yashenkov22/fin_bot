@@ -1741,25 +1741,37 @@ async def send_mass_message_test(bot: Bot,
                 is_image = postfix in IMAGE_POSTFIX_SET
                 file_id = _file.file_id
 
-                if is_image:
-                    await bot.send_photo(send_to,
-                                         photo=file_id,
-                                         caption=mass_message_text,
-                                         reply_markup=_kb.as_markup())
+                try:
+                    if is_image:
+                        await bot.send_photo(send_to,
+                                            photo=file_id,
+                                            caption=mass_message_text,
+                                            reply_markup=_kb.as_markup())
 
-                else:
-                    await bot.send_video(send_to,
-                                         video=file_id,
-                                         caption=mass_message_text,
-                                         reply_markup=_kb.as_markup(),
-                                         width=1920,
-                                         height=1080)
+                    else:
+                        await bot.send_video(send_to,
+                                            video=file_id,
+                                            caption=mass_message_text,
+                                            reply_markup=_kb.as_markup(),
+                                            width=1920,
+                                            height=1080)
+                except Exception as ex:
+                    SEND_TO_ID = '-1002646260144'
+
+                    await bot.send_message(chat_id=SEND_TO_ID,
+                                        text=f'Ошибка при отправке отложенного поста:\n {ex}')
 
             #'-1002852907835'
             else:
-                await bot.send_message(send_to,
-                                        text=mass_message_text,
-                                        reply_markup=_kb.as_markup())
+                try:
+                    await bot.send_message(send_to,
+                                            text=mass_message_text,
+                                            reply_markup=_kb.as_markup())
+                except Exception as ex:
+                    SEND_TO_ID = '-1002646260144'
+
+                    await bot.send_message(chat_id=SEND_TO_ID,
+                                        text=f'Ошибка при отправке отложенного поста:\n {ex}')
             # if file_group is not None:
             #     mb2 = await bot.send_media_group(FIN_CHANNEL_ID, media=file_group.build())    
             #             # print('MB2', mb2)
@@ -1862,7 +1874,7 @@ async def run_delay_background_task(bot: Bot,
                     await redis_pool.delete(key)
 
                     await redis_pool.enqueue_job(
-                        'run_delay_task',
+                        'run_delaчy_task',
                         obj_id,
                         _job_id=_job_id,
                         _queue_name='arq:low',

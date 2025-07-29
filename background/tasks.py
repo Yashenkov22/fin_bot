@@ -1171,6 +1171,11 @@ async def run_delay_task(cxt,
             await _session.execute(update_query)
 
             await _session.commit()
+
+            SEND_TO_ID = '-1002646260144'
+
+            await bot.send_message(chat_id=SEND_TO_ID,
+                                   text=f'Ошибка при отправке отложенного поста:\n {ex}')
         else:
             update_query = (
                 update(
