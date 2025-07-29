@@ -311,3 +311,33 @@ def sanitize_html_for_telegram(html: str) -> str:
             tag.unwrap()
 
     return str(soup)
+
+
+from bs4 import BeautifulSoup
+
+def clean_telegram_html(raw_html: str) -> str:
+    soup = BeautifulSoup(raw_html, "html.parser")
+
+    # Удаляем теги и стили, не поддерживаемые Telegram
+    for tag in soup.find_all(True):
+        if tag.name not in {"b", "strong", "i", "em", "u", "s", "del", "code", "pre", "a"}:
+            tag.unwrap()
+        else:
+            # Удаляем все атрибуты, кроме href у <a>
+            attrs = tag.attrs
+            if tag.name == "a":
+                tag.attrs = {"href": attrs.get("href")} if "href" in attrs else {}
+            else:
+                tag.attrs = {}
+
+    # Заменяем <br> на перенос строки
+    for br in soup.find_all("br"):
+        br.replace_with("\n")
+
+    # Заменяем strong/em на b/i
+    html = str(soup)
+    html = html.replace("<strong>", "<b>").replace("</strong>", "</b>")
+    html = html.replace("<em>", "<i>").replace("</em>", "</i>")
+    html = html.replace("<del>", "<s>").replace("</del>", "</s>")
+
+    return html.strip()

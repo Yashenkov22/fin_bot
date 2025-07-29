@@ -40,7 +40,7 @@ from .exc import NotEnoughGraphicData
 #                              add_task_to_delete_old_message_for_users)
 from .scheduler import add_task_to_delete_old_message_for_users
 from .storage import redis_client
-from .any import send_data_to_yandex_metica, support_request_type_dict, has_delayed_task_dict, sanitize_html_for_telegram
+from .any import clean_telegram_html, send_data_to_yandex_metica, support_request_type_dict, has_delayed_task_dict, sanitize_html_for_telegram
 from .pics import DEFAULT_PRODUCT_LIST_PHOTO_ID
 
 from keyboards import (add_back_btn,
@@ -1660,12 +1660,11 @@ async def send_mass_message_test(bot: Bot,
             mass_message_text: str = mass_message_text.replace('<p>','')\
                                                         .replace('</p>', '\n')\
                                                         .replace('<br>', '')\
-                                                        .replace('<p class="">', '')\
                                                         .replace('&nbsp;', ' ')\
                                                         .replace('<span>', '')\
                                                         .replace('</span>', '')
 
-            mass_message_text = sanitize_html_for_telegram(mass_message_text)
+            mass_message_text = clean_telegram_html(mass_message_text)
 
             # print(mass_message_text)
 

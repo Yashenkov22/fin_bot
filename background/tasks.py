@@ -38,7 +38,7 @@ from keyboards import (add_graphic_btn,
 from bot22 import bot
 
 from utils.storage import redis_client
-from utils.any import (generate_pretty_amount,
+from utils.any import (clean_telegram_html, generate_pretty_amount,
                   generate_sale_for_price,
                   add_message_to_delete_dict,
                   generate_percent_to_popular_product, sanitize_html_for_telegram,
@@ -1110,7 +1110,7 @@ async def run_delay_task(cxt,
                                                     .replace('<span>', '')\
                                                     .replace('</span>', '')
         
-        mass_message_text = sanitize_html_for_telegram(mass_message_text)
+        mass_message_text = clean_telegram_html(mass_message_text)
 
         _send_to = mass_message.send_to
 
