@@ -1796,11 +1796,11 @@ async def send_mass_message_test(bot: Bot,
 
 
 async def test_send(bot: Bot,
-                    chat_id: str):
+                    send_to: str):
     _text = 'Обновили подборку займов с максимальным процентом одобрения на сегодня!'
     _kb = create_webapp_btn_kb()
     try:
-        msg = await bot.send_message(chat_id=chat_id,
+        msg = await bot.send_message(chat_id=send_to,
                                text=_text,
                                reply_markup=_kb.as_markup())
         # await add_message_to_delete_dict(msg)
