@@ -107,7 +107,7 @@ def test_create_webapp_btn_kb(_kb: InlineKeyboardBuilder = None):
     if not _kb:
         _kb = InlineKeyboardBuilder()
     _kb.add(types.InlineKeyboardButton(text='Подобрать займ💸',
-                                       url='https://t.me/top100mfo_bot/app'))
+                                       url='https://t.me/top100mfo_bot/start'))
     # _kb.row(types.InlineKeyboardButton(text='Посмотреть цену товара',
     #                                    callback_data='check_price'))
 
