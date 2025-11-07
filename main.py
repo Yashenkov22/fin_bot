@@ -159,7 +159,7 @@ async def channel_mass_message(name_send: str):
     
 
 @app.get('/test')
-async def channel_mass_message():
+async def test_endpoint():
     SEND_TO_ID = '-1002646260144'
     await test_send(bot,
                     send_to=SEND_TO_ID)
