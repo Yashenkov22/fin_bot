@@ -1795,7 +1795,8 @@ async def send_mass_message_test(bot: Bot,
             # session.close()
 
 
-async def test_send(chat_id: str):
+async def test_send(bot: Bot,
+                    chat_id: str):
     _text = 'Обновили подборку займов с максимальным процентом одобрения на сегодня!'
     _kb = create_webapp_btn_kb()
     try:
