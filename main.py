@@ -25,7 +25,7 @@ from db.base import engine, session, Base, db_url, get_session
 
 from middlewares.db import DbSessionMiddleware
 
-from utils.handlers import run_delay_background_task, send_mass_message_test
+from utils.handlers import run_delay_background_task, send_mass_message_test, test_send
 from utils.storage import redis_client, storage
 from utils.scheduler import (scheduler,
                              add_task_to_delete_old_message_for_users)
@@ -161,9 +161,8 @@ async def channel_mass_message(name_send: str):
 @app.get('/test')
 async def channel_mass_message():
     SEND_TO_ID = '-1002646260144'
-    await send_mass_message_test(bot,
-                                 session=session(),
-                                 send_to=SEND_TO_ID)
+    await test_send(bot,
+                    send_to=SEND_TO_ID)
 
 
 @app.get('/run_background_task_with_delay')
