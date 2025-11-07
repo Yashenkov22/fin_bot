@@ -158,6 +158,14 @@ async def channel_mass_message(name_send: str):
                                  send_to=SEND_TO_ID)
     
 
+@app.get('/test')
+async def channel_mass_message():
+    SEND_TO_ID = '-1002646260144'
+    await send_mass_message_test(bot,
+                                 session=session(),
+                                 send_to=SEND_TO_ID)
+
+
 @app.get('/run_background_task_with_delay')
 async def run_delay_mass_message(obj_id: int):
     # SEND_TO_ID = '686339126'

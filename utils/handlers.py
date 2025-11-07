@@ -1795,6 +1795,17 @@ async def send_mass_message_test(bot: Bot,
             # session.close()
 
 
+async def test_send(chat_id: str):
+    _text = 'Обновили подборку займов с максимальным процентом одобрения на сегодня!'
+    _kb = create_webapp_btn_kb()
+    try:
+        msg = await bot.send_message(chat_id=chat_id,
+                               text=_text,
+                               reply_markup=_kb.as_markup())
+        # await add_message_to_delete_dict(msg)
+    except Exception as ex:
+        print(ex)
+
 
 async def run_delay_background_task(bot: Bot,
                             session: AsyncSession,
